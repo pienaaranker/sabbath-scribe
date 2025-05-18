@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
@@ -13,6 +14,9 @@ import { Calendar } from "@/components/ui/calendar";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Image from 'next/image';
+
+const ALL_ROLES_FILTER_VALUE = "all_roles_filter_val";
+const ALL_PEOPLE_FILTER_VALUE = "all_people_filter_val";
 
 const AssignmentDisplayCard: React.FC<{ assignment: SabbathAssignment, isUnassigned: boolean }> = ({ assignment, isUnassigned }) => {
   const cardClasses = isUnassigned 
@@ -43,8 +47,8 @@ const AssignmentDisplayCard: React.FC<{ assignment: SabbathAssignment, isUnassig
 export default function SabbathViewClient() {
   const { getAssignmentsForDate, getPersonById, people, isLoading } = useAppContext();
   const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
-  const [filterRole, setFilterRole] = useState<string>('');
-  const [filterPerson, setFilterPerson] = useState<string>('');
+  const [filterRole, setFilterRole] = useState<string>(''); // Empty string for "All" or placeholder
+  const [filterPerson, setFilterPerson] = useState<string>(''); // Empty string for "All" or placeholder
   const [searchTerm, setSearchTerm] = useState<string>('');
 
   useEffect(() => {
@@ -69,8 +73,8 @@ export default function SabbathViewClient() {
 
   const filteredAssignments = useMemo(() => {
     return sabbathAssignments.filter(assignment => {
-      const roleMatch = filterRole ? assignment.roleId === filterRole : true;
-      const personMatch = filterPerson ? assignment.person?.id === filterPerson : true;
+      const roleMatch = (filterRole === '' || filterRole === ALL_ROLES_FILTER_VALUE) ? true : assignment.roleId === filterRole;
+      const personMatch = (filterPerson === '' || filterPerson === ALL_PEOPLE_FILTER_VALUE) ? true : assignment.person?.id === filterPerson;
       const searchTermMatch = searchTerm ? 
         (assignment.roleName.toLowerCase().includes(searchTerm.toLowerCase()) || 
          assignment.person?.name.toLowerCase().includes(searchTerm.toLowerCase())) 
@@ -126,12 +130,12 @@ export default function SabbathViewClient() {
         <div className="mt-4 flex flex-col sm:flex-row gap-2 items-center border-t pt-4">
             <div className="flex items-center gap-1 w-full sm:w-auto">
               <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={filterRole} onValueChange={setFilterRole}>
+              <Select value={filterRole} onValueChange={(value) => setFilterRole(value === ALL_ROLES_FILTER_VALUE ? '' : value)}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Filter by Role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All Roles</SelectItem>
+                  <SelectItem value={ALL_ROLES_FILTER_VALUE}>All Roles</SelectItem>
                   {ROLES_CONFIG.map(role => (
                     <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
                   ))}
@@ -140,12 +144,12 @@ export default function SabbathViewClient() {
             </div>
             <div className="flex items-center gap-1 w-full sm:w-auto">
                <Users className="h-4 w-4 text-muted-foreground" />
-              <Select value={filterPerson} onValueChange={setFilterPerson}>
+              <Select value={filterPerson} onValueChange={(value) => setFilterPerson(value === ALL_PEOPLE_FILTER_VALUE ? '' : value)}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Filter by Person" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">All People</SelectItem>
+                  <SelectItem value={ALL_PEOPLE_FILTER_VALUE}>All People</SelectItem>
                   {people.map(person => (
                     <SelectItem key={person.id} value={person.id}>{person.name}</SelectItem>
                   ))}
@@ -190,3 +194,4 @@ export default function SabbathViewClient() {
 function isSaturday(date: Date) {
   return date.getDay() === 6;
 }
+
