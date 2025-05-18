@@ -18,6 +18,7 @@ import { formatDateForDisplay, formatDateForDb } from '@/lib/date-utils';
 import { useToast } from '@/hooks/use-toast';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Wand2 } from "lucide-react";
+import { Card } from "@/components/ui/card";
 
 interface SuggestAssignmentsDialogProps {
   isOpen: boolean;
@@ -74,7 +75,7 @@ export default function SuggestAssignmentsDialog({
   };
   
   // Fetch suggestions when dialog opens and targetDate is valid
-  useEffect(()_ => {
+  useEffect(() => {
     if (isOpen && targetDate) {
         fetchSuggestions();
     }
