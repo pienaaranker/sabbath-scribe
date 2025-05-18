@@ -20,9 +20,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-  DialogFooter,
-  DialogClose,
-} from "@/components/ui/dialog";
+} from "@/components/ui/dialog"; // Removed DialogFooter, DialogClose as they are used inside PersonForm
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"; // Added Card imports
 import PersonForm from './person-form';
 import { ROLES_CONFIG } from '@/lib/constants';
 import { Badge } from '@/components/ui/badge';
