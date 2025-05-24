@@ -7,17 +7,16 @@ import { useFirestore } from '@/context/firestore-context';
 import { ROLES_CONFIG, ROLE_NAMES_MAP } from '@/lib/constants';
 import type { Person, RoleId, Assignment, SabbathAssignment } from '@/types';
 import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb } from '@/lib/date-utils';
-import { ChevronLeft, ChevronRight, CalendarIcon, Edit, Users, Clipboard } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarIcon, Users } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import AssignPersonDialog from './assign-person-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function AssignmentManagementClient() {
   const { people, getAssignmentsForDate, getPersonById, addAssignment, updateAssignment, deleteAssignment, loading, error } = useFirestore();
   const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
-  const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
-  const [currentAssignmentTarget, setCurrentAssignmentTarget] = useState<{ date: string; roleId: RoleId } | null>(null);
   const { toast } = useToast();
 
   const formattedDate = useMemo(() => formatDateForDb(selectedDate), [selectedDate]);
@@ -39,17 +38,10 @@ export default function AssignmentManagementClient() {
     }
   };
 
-  const openAssignDialog = (roleId: RoleId) => {
-    setCurrentAssignmentTarget({ date: formattedDate, roleId });
-    setIsAssignDialogOpen(true);
-  };
-
-  const handleAssignmentSave = async (personId: string | null) => {
-    if (!currentAssignmentTarget) return;
-
+  const handleAssignmentChange = async (roleId: RoleId, personId: string | null) => {
     try {
-      const existingAssignments = getAssignmentsForDate(currentAssignmentTarget.date);
-      const existingAssignment = existingAssignments.find(a => a.roleId === currentAssignmentTarget.roleId);
+      const existingAssignments = getAssignmentsForDate(formattedDate);
+      const existingAssignment = existingAssignments.find(a => a.roleId === roleId);
 
       if (personId === null) {
         // Remove assignment
@@ -63,8 +55,8 @@ export default function AssignmentManagementClient() {
         } else {
           // Create new assignment
           await addAssignment({
-            date: currentAssignmentTarget.date,
-            roleId: currentAssignmentTarget.roleId,
+            date: formattedDate,
+            roleId: roleId,
             personId
           });
         }
@@ -72,7 +64,7 @@ export default function AssignmentManagementClient() {
 
       toast({
         title: "Assignment Updated",
-        description: `${ROLE_NAMES_MAP[currentAssignmentTarget.roleId]} assignment has been updated for ${formatDateForDisplay(currentAssignmentTarget.date)}.`,
+        description: `${ROLE_NAMES_MAP[roleId]} assignment has been updated for ${formatDateForDisplay(formattedDate)}.`,
       });
     } catch (error) {
       toast({
@@ -81,18 +73,13 @@ export default function AssignmentManagementClient() {
         variant: "destructive",
       });
     }
-
-    setIsAssignDialogOpen(false);
-    setCurrentAssignmentTarget(null);
   };
   
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#suggest") {
-      // Optionally remove the hash
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
   }, []);
-
 
   if (loading) {
     return (
@@ -135,7 +122,7 @@ export default function AssignmentManagementClient() {
                     selected={selectedDate}
                     onSelect={handleDateChange}
                     initialFocus
-                    disabled={(date) => date.getDay() !== 6} // Only allow Saturdays
+                    disabled={(date) => date.getDay() !== 6}
                   />
                 </PopoverContent>
               </Popover>
@@ -146,51 +133,61 @@ export default function AssignmentManagementClient() {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {ROLES_CONFIG.map((role) => {
-            const assignedPerson = sabbathAssignmentsMap.get(role.id);
-            const isUnassigned = !assignedPerson;
-            const cardClass = isUnassigned ? "bg-card border-destructive/30" : "feature-card";
-            
-            return (
-              <div key={role.id} className={cardClass}>
-                <div className="feature-icon">
-                  <Clipboard className="h-5 w-5" />
-                </div>
-                <h3 className="text-base font-semibold text-primary truncate mb-2">{role.name}</h3>
-                {assignedPerson ? (
-                  <div className="flex items-center gap-2 mb-4">
-                    <Users className="h-4 w-4 text-muted-foreground" />
-                    <p className="text-sm text-secondary-foreground font-medium">{assignedPerson.name}</p>
-                  </div>
-                ) : (
-                  <p className="text-sm text-destructive font-semibold mb-4">Not Assigned</p>
-                )}
-                <Button 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={() => openAssignDialog(role.id)}
-                  className="w-full"
-                >
-                  <Edit className="mr-2 h-3 w-3" /> {assignedPerson ? 'Change' : 'Assign'}
-                </Button>
-              </div>
-            );
-          })}
+        <div className="mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Role</TableHead>
+                <TableHead>Assignee</TableHead>
+                <TableHead className="w-[100px]">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {ROLES_CONFIG.map((role) => {
+                const assignedPerson = sabbathAssignmentsMap.get(role.id);
+                const isUnassigned = !assignedPerson;
+                
+                // Filter people who can fill this role
+                const assignablePeople = people.filter(p => 
+                  !p.fillableRoleIds || p.fillableRoleIds.length === 0 || p.fillableRoleIds.includes(role.id)
+                );
+
+                return (
+                  <TableRow key={role.id}>
+                    <TableCell className="font-medium">{role.name}</TableCell>
+                    <TableCell>
+                      <Select
+                        value={assignedPerson?.id || ""}
+                        onValueChange={(value) => handleAssignmentChange(role.id, value === "unassign" ? null : value)}
+                      >
+                        <SelectTrigger className="w-[200px]">
+                          <SelectValue placeholder="Select a person" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="unassign">-- Unassign --</SelectItem>
+                          {assignablePeople.map((person) => (
+                            <SelectItem key={person.id} value={person.id}>
+                              {person.name}
+                            </SelectItem>
+                          ))}
+                          {assignablePeople.length === 0 && (
+                            <p className="p-2 text-sm text-muted-foreground">No people available for this role.</p>
+                          )}
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isUnassigned ? 'bg-destructive/10 text-destructive' : 'bg-green-100 text-green-800'}`}>
+                        {isUnassigned ? 'Unassigned' : 'Assigned'}
+                      </span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
         </div>
       </div>
-
-      {currentAssignmentTarget && (
-        <AssignPersonDialog
-          isOpen={isAssignDialogOpen}
-          onClose={() => setIsAssignDialogOpen(false)}
-          date={currentAssignmentTarget.date}
-          roleId={currentAssignmentTarget.roleId}
-          currentPersonId={sabbathAssignmentsMap.get(currentAssignmentTarget.roleId)?.id || null}
-          onSave={handleAssignmentSave}
-          people={people}
-        />
-      )}
     </div>
   );
 }
