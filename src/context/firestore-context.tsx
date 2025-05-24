@@ -186,14 +186,23 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
     try {
       const scheduleId = await scheduleService.create(user.uid, schedule);
       
+      // Defensive: Wait for schedule doc to exist before initializing subcollections
+      let tries = 0;
+      let scheduleDoc = null;
+      while (tries < 5 && !scheduleDoc) {
+        scheduleDoc = await scheduleService.getById(scheduleId);
+        if (!scheduleDoc) await new Promise(res => setTimeout(res, 200)); // wait 200ms
+        tries++;
+      }
+      if (!scheduleDoc) throw new Error('Schedule document not found after creation!');
+      
       // Initialize default roles for the new schedule
       await initializeScheduleRoles(scheduleId);
       
-      // Refresh the schedules list
+      // Only now refresh the schedules list and set the new schedule as current
       const userSchedules = await scheduleService.getAll(user.uid);
       setSchedules(userSchedules);
       
-      // Set the newly created schedule as the current one
       const newSchedule = userSchedules.find(s => s.id === scheduleId);
       if (newSchedule) {
         setCurrentSchedule(newSchedule);

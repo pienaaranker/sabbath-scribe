@@ -79,28 +79,22 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen gradient-bg flex items-center justify-center p-4">
-      <div className="floating-elements">
-        <div className="floating-element" style={{top: '20%', left: '20%'}}></div>
-        <div className="floating-element" style={{top: '60%', left: '80%', animationDelay: '2s'}}></div>
-        <div className="floating-element" style={{top: '40%', left: '60%', animationDelay: '4s'}}></div>
-      </div>
-      
-      <div className="w-full max-w-md relative z-10">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-full max-w-md p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
         <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-white text-2xl font-bold hover:opacity-90 transition-opacity">
-            <CalendarCheck className="h-8 w-8" />
+          <Link href="/" className="inline-flex items-center gap-2 text-primary text-2xl font-bold hover:opacity-90 transition-opacity">
+            <CalendarCheck className="h-8 w-8 text-primary" />
             SabbathScribe
           </Link>
-          <p className="text-white/80 mt-2">Church Roster Management</p>
+          <p className="text-gray-500 mt-2 text-base">Church Roster Management</p>
         </div>
 
-        <Card className="shadow-2xl border-0">
+        <Card className="shadow-none border-0 bg-transparent">
           <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl">
+            <CardTitle className="text-2xl text-gray-900">
               {isSignUp ? 'Create Account' : 'Sign In'}
             </CardTitle>
-            <CardDescription>
+            <CardDescription className="text-gray-500">
               {isSignUp 
                 ? 'Join SabbathScribe to manage your church roster' 
                 : 'Welcome back! Please sign in to continue'}
@@ -112,7 +106,7 @@ export default function AuthPage() {
               {isSignUp && (
                 <div className="space-y-2">
                   <Label htmlFor="displayName" className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
+                    <User className="h-4 w-4 text-primary" />
                     Full Name
                   </Label>
                   <Input
@@ -129,7 +123,7 @@ export default function AuthPage() {
               
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
+                  <Mail className="h-4 w-4 text-primary" />
                   Email
                 </Label>
                 <Input
@@ -145,7 +139,7 @@ export default function AuthPage() {
               
               <div className="space-y-2">
                 <Label htmlFor="password" className="flex items-center gap-2">
-                  <Lock className="h-4 w-4" />
+                  <Lock className="h-4 w-4 text-primary" />
                   Password
                 </Label>
                 <Input
@@ -162,7 +156,7 @@ export default function AuthPage() {
               
               <Button 
                 type="submit" 
-                className="w-full gradient-bg text-white border-0 hover:opacity-90"
+                className="w-full bg-primary text-white border-0 hover:bg-primary/90"
                 disabled={loading}
               >
                 {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
@@ -174,7 +168,7 @@ export default function AuthPage() {
                 <Separator className="w-full" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-background px-2 text-muted-foreground">
+                <span className="bg-white px-2 text-gray-400">
                   Or continue with
                 </span>
               </div>
@@ -183,10 +177,10 @@ export default function AuthPage() {
             <Button 
               onClick={handleGoogleAuth}
               variant="outline" 
-              className="w-full"
+              className="w-full border-gray-200"
               disabled={loading}
             >
-              <Chrome className="mr-2 h-4 w-4" />
+              <Chrome className="mr-2 h-4 w-4 text-primary" />
               Sign in with Google
             </Button>
 
@@ -195,7 +189,7 @@ export default function AuthPage() {
                 variant="link"
                 onClick={() => setIsSignUp(!isSignUp)}
                 disabled={loading}
-                className="text-sm"
+                className="text-sm text-primary"
               >
                 {isSignUp 
                   ? 'Already have an account? Sign in' 
@@ -208,7 +202,7 @@ export default function AuthPage() {
         <div className="text-center mt-6">
           <Link 
             href="/" 
-            className="text-white/80 hover:text-white transition-colors text-sm"
+            className="text-gray-400 hover:text-primary transition-colors text-sm"
           >
             ← Back to main site
           </Link>

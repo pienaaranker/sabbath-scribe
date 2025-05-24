@@ -96,7 +96,9 @@ export const scheduleService = {
     const cleanSchedule = Object.fromEntries(
       Object.entries({
         ...schedule,
-        adminUserIds: schedule.adminUserIds || [],
+        adminUserIds: (schedule.adminUserIds && schedule.adminUserIds.length > 0)
+          ? Array.from(new Set([userId, ...schedule.adminUserIds]))
+          : [userId],
       }).filter(([_, value]) => value !== undefined)
     );
     

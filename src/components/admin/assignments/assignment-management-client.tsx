@@ -4,7 +4,6 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useFirestore } from '@/context/firestore-context';
-import { ROLES_CONFIG, ROLE_NAMES_MAP } from '@/lib/constants';
 import type { Person, RoleId, Assignment, SabbathAssignment } from '@/types';
 import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb } from '@/lib/date-utils';
 import { ChevronLeft, ChevronRight, CalendarIcon, Users } from 'lucide-react';
@@ -15,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function AssignmentManagementClient() {
-  const { people, getAssignmentsForDate, getPersonById, addAssignment, updateAssignment, deleteAssignment, loading, error } = useFirestore();
+  const { people, getAssignmentsForDate, getPersonById, addAssignment, updateAssignment, deleteAssignment, loading, error, roles } = useFirestore();
   const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
   const { toast } = useToast();
 
@@ -24,13 +23,13 @@ export default function AssignmentManagementClient() {
   const sabbathAssignmentsMap = useMemo(() => {
     const assignmentsForDate = getAssignmentsForDate(formattedDate);
     const map = new Map<RoleId, Person | null>();
-    ROLES_CONFIG.forEach(role => {
+    roles.forEach(role => {
       const assignment = assignmentsForDate.find(a => a.roleId === role.id);
       const person = assignment?.personId ? getPersonById(assignment.personId) : null;
-      map.set(role.id, person || null);
+      map.set(role.id as RoleId, person || null);
     });
     return map;
-  }, [formattedDate, getAssignmentsForDate, getPersonById]);
+  }, [formattedDate, getAssignmentsForDate, getPersonById, roles]);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -62,9 +61,10 @@ export default function AssignmentManagementClient() {
         }
       }
 
+      const roleName = roles.find(r => r.id === roleId)?.name || 'Role';
       toast({
         title: "Assignment Updated",
-        description: `${ROLE_NAMES_MAP[roleId]} assignment has been updated for ${formatDateForDisplay(formattedDate)}.`,
+        description: `${roleName} assignment has been updated for ${formatDateForDisplay(formattedDate)}.`,
       });
     } catch (error) {
       toast({
@@ -143,8 +143,8 @@ export default function AssignmentManagementClient() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {ROLES_CONFIG.map((role) => {
-                const assignedPerson = sabbathAssignmentsMap.get(role.id);
+              {roles.map((role) => {
+                const assignedPerson = sabbathAssignmentsMap.get(role.id as RoleId);
                 const isUnassigned = !assignedPerson;
                 
                 // Filter people who can fill this role
@@ -158,7 +158,7 @@ export default function AssignmentManagementClient() {
                     <TableCell>
                       <Select
                         value={assignedPerson?.id || ""}
-                        onValueChange={(value) => handleAssignmentChange(role.id, value === "unassign" ? null : value)}
+                        onValueChange={(value) => handleAssignmentChange(role.id as RoleId, value === "unassign" ? null : value)}
                       >
                         <SelectTrigger className="w-[200px]">
                           <SelectValue placeholder="Select a person" />
