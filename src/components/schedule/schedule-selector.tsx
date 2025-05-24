@@ -102,7 +102,7 @@ export default function ScheduleSelector() {
         onValueChange={handleScheduleChange}
         disabled={schedules.length === 0}
       >
-        <SelectTrigger className="w-[200px]">
+        <SelectTrigger className="w-[200px] text-black">
           <SelectValue placeholder="Select a schedule" />
         </SelectTrigger>
         <SelectContent>
