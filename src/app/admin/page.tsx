@@ -19,7 +19,7 @@ export default function AdminDashboardPage() {
             icon={<Users className="h-8 w-8 text-white" />}
             link="/admin/people"
             actionText="Go to People"
-            imageSrc="https://placehold.co/600x400.png"
+            imageSrc="/people.jpeg"
             imageAlt="People management"
             dataAiHint="community group"
           />
@@ -29,7 +29,7 @@ export default function AdminDashboardPage() {
             icon={<CalendarDays className="h-8 w-8 text-white" />}
             link="/admin/assignments"
             actionText="Go to Assignments"
-            imageSrc="https://placehold.co/600x400.png"
+            imageSrc="/clipboard.jpeg"
             imageAlt="Assignment management"
             dataAiHint="calendar schedule"
           />

@@ -184,7 +184,7 @@ export default function SabbathViewClient() {
           </div>
         ) : (
           <div className="text-center py-10 text-muted-foreground">
-            <Image src="https://placehold.co/300x200.png" alt="No assignments" width={300} height={200} className="mx-auto mb-4 rounded-md" data-ai-hint="empty state document" />
+            <Image src="/clipboard.jpeg" alt="No assignments" width={300} height={200} className="mx-auto mb-4 rounded-md" data-ai-hint="empty state document" />
             <p className="text-lg">No assignments found for this date or matching your filters.</p>
             <p>Try adjusting the date or clearing filters.</p>
           </div>
