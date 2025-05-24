@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
-import { PlusCircle, Settings } from "lucide-react";
+import { PlusCircle, Settings, Link as LinkIcon } from "lucide-react";
 import { useFirestore } from '@/context/firestore-context';
 import { useAuth } from '@/context/auth-context';
 import { Schedule } from '@/types';
@@ -177,12 +177,48 @@ export default function ScheduleSelector() {
               </div>
               <div className="mt-3 pt-3 border-t border-border">
                 <Button variant="ghost" size="sm" className="w-full justify-start text-sm" asChild>
-                  <a href={`/admin/schedules/${currentSchedule.id}`}>Manage Schedule</a>
+                  <a href={`/admin/schedules`}>Manage Schedule</a>
                 </Button>
               </div>
             </div>
           </PopoverContent>
         </Popover>
+      )}
+
+      {/* Public Site and Copy Link Buttons */}
+      {currentSchedule && (
+        <div className="flex items-center gap-1">
+          <Button
+            variant="outline"
+            size="sm"
+            title="View public site"
+            asChild
+            className="text-black"
+          >
+            <a
+              href={`/schedule/${currentSchedule.id}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Public Site
+            </a>
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            title="Copy public share link"
+            onClick={async () => {
+              const url = `${window.location.origin}/schedule/${currentSchedule.id}`;
+              await navigator.clipboard.writeText(url);
+              toast({
+                title: "Link Copied!",
+                description: "Public schedule link copied to clipboard.",
+              });
+            }}
+          >
+            <LinkIcon className="h-4 w-4" />
+          </Button>
+        </div>
       )}
     </div>
   );

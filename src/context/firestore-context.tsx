@@ -22,6 +22,7 @@ interface FirestoreContextType {
   schedules: Schedule[];
   currentSchedule: Schedule | null;
   setCurrentSchedule: (schedule: Schedule) => void;
+  setCurrentScheduleById: (id: string) => Promise<void>;
   addSchedule: (schedule: Omit<Schedule, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>) => Promise<string>;
   updateSchedule: (id: string, schedule: Partial<Omit<Schedule, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>>) => Promise<void>;
   deleteSchedule: (id: string) => Promise<void>;
@@ -86,24 +87,26 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
+  const [isPublicView, setIsPublicView] = useState(false);
 
   // Load user's schedules
   useEffect(() => {
+    if (isPublicView) return;
     const loadUserSchedules = async () => {
       if (!user) {
-        setSchedules([]);
-        setCurrentSchedule(null);
-        setLoading(false);
+        // Only clear state if not in public view
+        if (!isPublicView) {
+          setSchedules([]);
+          setCurrentSchedule(null);
+          setLoading(false);
+        }
         return;
       }
-
       try {
         setLoading(true);
         setError(null);
-
         const userSchedules = await scheduleService.getAll(user.uid);
         setSchedules(userSchedules);
-
         // If there are schedules, select the first one as current
         // or use the last selected from localStorage if available
         if (userSchedules.length > 0) {
@@ -111,7 +114,6 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
           const savedSchedule = savedScheduleId 
             ? userSchedules.find(s => s.id === savedScheduleId) 
             : null;
-          
           if (savedSchedule) {
             setCurrentSchedule(savedSchedule);
           } else {
@@ -121,7 +123,6 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
         } else {
           setCurrentSchedule(null);
         }
-        
         setLoading(false);
       } catch (err) {
         console.error('Error loading schedules:', err);
@@ -129,9 +130,8 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
         setLoading(false);
       }
     };
-
     loadUserSchedules();
-  }, [user]);
+  }, [user, isPublicView]);
 
   // Load schedule data when current schedule changes
   useEffect(() => {
@@ -177,6 +177,47 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
   const handleSetCurrentSchedule = (schedule: Schedule) => {
     setCurrentSchedule(schedule);
     localStorage.setItem('currentScheduleId', schedule.id);
+  };
+
+  // NEW: Set current schedule by id (for public viewing)
+  const setCurrentScheduleById = async (id: string) => {
+    setIsPublicView(true); // NEW: keep true for session
+    try {
+      setLoading(true);
+      setError(null);
+      const schedule = await scheduleService.getById(id);
+      if (schedule) {
+        setCurrentSchedule(schedule);
+        // Load schedule data (members, people, assignments, roles)
+        const [membersData, peopleData, assignmentsData, rolesData] = await Promise.all([
+          scheduleService.getMembers(schedule.id),
+          peopleService.getAll(schedule.id),
+          assignmentService.getAll(schedule.id),
+          roleService.getAll(schedule.id)
+        ]);
+        setScheduleMembers(membersData);
+        setPeople(peopleData);
+        setAssignments(assignmentsData);
+        setRoles(rolesData);
+      } else {
+        setCurrentSchedule(null);
+        setPeople([]);
+        setAssignments([]);
+        setRoles([]);
+        setScheduleMembers([]);
+        setError('Schedule not found');
+      }
+    } catch (err) {
+      setCurrentSchedule(null);
+      setPeople([]);
+      setAssignments([]);
+      setRoles([]);
+      setScheduleMembers([]);
+      setError('Failed to load schedule.');
+    } finally {
+      setLoading(false);
+      // Do NOT set isPublicView to false here
+    }
   };
 
   // Schedule operations
@@ -504,6 +545,7 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
     schedules,
     currentSchedule,
     setCurrentSchedule: handleSetCurrentSchedule,
+    setCurrentScheduleById,
     addSchedule,
     updateSchedule,
     deleteSchedule,

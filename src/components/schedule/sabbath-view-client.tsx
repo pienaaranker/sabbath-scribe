@@ -71,12 +71,20 @@ const getPreviousMonth = (date: Date): Date => {
   return prevMonth;
 };
 
-export default function SabbathViewClient() {
-  const { people, getSabbathAssignments, loading, error } = useFirestore();
+// Add prop type
+interface SabbathViewClientProps {
+  scheduleId?: string;
+}
+
+// Accept the prop
+export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps) {
+  const { people, getSabbathAssignments, loading, error, setCurrentScheduleById, currentSchedule } = useFirestore();
   const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
-  const [filterRole, setFilterRole] = useState<string>(''); // Empty string for "All" or placeholder
-  const [filterPerson, setFilterPerson] = useState<string>(''); // Empty string for "All" or placeholder
+  const [filterRole, setFilterRole] = useState<string>('');
+  const [filterPerson, setFilterPerson] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [publicLoading, setPublicLoading] = useState(false);
+  const [publicError, setPublicError] = useState<string | null>(null);
   
   const formattedDate = useMemo(() => formatDateForDb(selectedDate), [selectedDate]);
 
@@ -96,6 +104,33 @@ export default function SabbathViewClient() {
     });
   }, [sabbathAssignments, filterRole, filterPerson, searchTerm]);
 
+  // Debug logs
+  console.log('[SabbathViewClient] scheduleId:', scheduleId);
+  console.log('[SabbathViewClient] loading:', loading, 'publicLoading:', publicLoading, 'error:', error, 'publicError:', publicError);
+  console.log('[SabbathViewClient] currentSchedule:', currentSchedule);
+
+  useEffect(() => {
+    if (
+      scheduleId &&
+      (!currentSchedule || currentSchedule.id !== scheduleId)
+    ) {
+      console.log('[SabbathViewClient] Calling setCurrentScheduleById with', scheduleId);
+      setPublicLoading(true);
+      setCurrentScheduleById(scheduleId)
+        .then(() => {
+          setPublicError(null);
+          console.log('[SabbathViewClient] setCurrentScheduleById resolved');
+        })
+        .catch((err) => {
+          setPublicError('Schedule not found');
+          console.error('[SabbathViewClient] setCurrentScheduleById error', err);
+        })
+        .finally(() => {
+          setPublicLoading(false);
+          console.log('[SabbathViewClient] setCurrentScheduleById finished');
+        });
+    }
+  }, [scheduleId, setCurrentScheduleById, currentSchedule]);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -103,7 +138,7 @@ export default function SabbathViewClient() {
     }
   };
 
-  if (loading) {
+  if (publicLoading || loading) {
     return (
       <div className="container">
         <div className="text-center py-20">
@@ -114,11 +149,11 @@ export default function SabbathViewClient() {
     );
   }
 
-  if (error) {
+  if (publicError || error) {
     return (
       <div className="container">
         <div className="text-center py-20">
-          <p className="text-destructive mb-4">{error}</p>
+          <p className="text-destructive mb-4">{publicError || error}</p>
           <Button onClick={() => window.location.reload()}>Try Again</Button>
         </div>
       </div>
