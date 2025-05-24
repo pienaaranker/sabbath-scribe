@@ -21,17 +21,31 @@ const AssignmentDisplayCard: React.FC<{ assignment: SabbathAssignment, isUnassig
   const cardClasses = isUnassigned 
     ? "bg-card border-destructive/30" 
     : "feature-card";
-  const personNameClasses = isUnassigned ? "text-destructive font-semibold" : "text-secondary-foreground font-medium";
+  const personNameClasses = isUnassigned 
+    ? "text-destructive font-semibold text-lg" 
+    : "text-primary font-semibold text-lg";
 
   return (
-    <div className={cardClasses}>
-      <h3 className="text-base font-semibold text-primary truncate mb-2">{assignment.roleName}</h3>
+    <div className={`${cardClasses} p-4`}>
+      <div className="border-b border-border pb-2 mb-3">
+        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{assignment.roleName}</h3>
+      </div>
       {assignment.person ? (
-        <div className="flex items-center gap-2">
-          <p className={`text-sm ${personNameClasses}`}>{assignment.person.name}</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className={personNameClasses}>{assignment.person.name}</p>
+            <p className="text-sm text-muted-foreground mt-1">Assigned</p>
+          </div>
+          <div className={`h-2 w-2 rounded-full ${isUnassigned ? 'bg-destructive' : 'bg-green-500'}`} />
         </div>
       ) : (
-        <p className={`text-sm ${personNameClasses}`}>Not Assigned</p>
+        <div className="flex items-center justify-between">
+          <div>
+            <p className={personNameClasses}>Not Assigned</p>
+            <p className="text-sm text-muted-foreground mt-1">Needs Assignment</p>
+          </div>
+          <div className="h-2 w-2 rounded-full bg-destructive" />
+        </div>
       )}
     </div>
   );
