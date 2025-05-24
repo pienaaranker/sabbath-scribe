@@ -71,12 +71,20 @@ const getPreviousMonth = (date: Date): Date => {
   return prevMonth;
 };
 
-export default function SabbathViewClient() {
-  const { people, getSabbathAssignments, loading, error } = useFirestore();
+// Add prop type
+interface SabbathViewClientProps {
+  scheduleId?: string;
+}
+
+// Accept the prop
+export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps) {
+  const { people, getSabbathAssignments, loading, error, setCurrentScheduleById, currentSchedule } = useFirestore();
   const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
-  const [filterRole, setFilterRole] = useState<string>(''); // Empty string for "All" or placeholder
-  const [filterPerson, setFilterPerson] = useState<string>(''); // Empty string for "All" or placeholder
+  const [filterRole, setFilterRole] = useState<string>('');
+  const [filterPerson, setFilterPerson] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
+  const [publicLoading, setPublicLoading] = useState(false);
+  const [publicError, setPublicError] = useState<string | null>(null);
   
   const formattedDate = useMemo(() => formatDateForDb(selectedDate), [selectedDate]);
 
@@ -96,6 +104,33 @@ export default function SabbathViewClient() {
     });
   }, [sabbathAssignments, filterRole, filterPerson, searchTerm]);
 
+  // Debug logs
+  console.log('[SabbathViewClient] scheduleId:', scheduleId);
+  console.log('[SabbathViewClient] loading:', loading, 'publicLoading:', publicLoading, 'error:', error, 'publicError:', publicError);
+  console.log('[SabbathViewClient] currentSchedule:', currentSchedule);
+
+  useEffect(() => {
+    if (
+      scheduleId &&
+      (!currentSchedule || currentSchedule.id !== scheduleId)
+    ) {
+      console.log('[SabbathViewClient] Calling setCurrentScheduleById with', scheduleId);
+      setPublicLoading(true);
+      setCurrentScheduleById(scheduleId)
+        .then(() => {
+          setPublicError(null);
+          console.log('[SabbathViewClient] setCurrentScheduleById resolved');
+        })
+        .catch((err) => {
+          setPublicError('Schedule not found');
+          console.error('[SabbathViewClient] setCurrentScheduleById error', err);
+        })
+        .finally(() => {
+          setPublicLoading(false);
+          console.log('[SabbathViewClient] setCurrentScheduleById finished');
+        });
+    }
+  }, [scheduleId, setCurrentScheduleById, currentSchedule]);
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
@@ -103,7 +138,7 @@ export default function SabbathViewClient() {
     }
   };
 
-  if (loading) {
+  if (publicLoading || loading) {
     return (
       <div className="container">
         <div className="text-center py-20">
@@ -114,11 +149,11 @@ export default function SabbathViewClient() {
     );
   }
 
-  if (error) {
+  if (publicError || error) {
     return (
       <div className="container">
         <div className="text-center py-20">
-          <p className="text-destructive mb-4">{error}</p>
+          <p className="text-destructive mb-4">{publicError || error}</p>
           <Button onClick={() => window.location.reload()}>Try Again</Button>
         </div>
       </div>
@@ -177,7 +212,7 @@ export default function SabbathViewClient() {
             </div>
             
             {filteredAssignments.length > 0 ? (
-              <div className="features-grid">
+              <div className="flex flex-col gap-4">
                 {filteredAssignments.map((assignment) => (
                   <AssignmentDisplayCard 
                     key={assignment.roleId} 
@@ -274,26 +309,6 @@ export default function SabbathViewClient() {
           </div>
         </div>
       </section>
-      
-      <div className="tech-stack">
-        <div className="container">
-          <h2 className="section-title" style={{color: 'white'}}>Key Features</h2>
-          <div className="tech-grid">
-            <div className="tech-item">
-              <h4 className="text-lg font-semibold mb-2">Role Assignment</h4>
-              <p className="text-sm opacity-80">Efficiently assign church members to various roles for each Sabbath service.</p>
-            </div>
-            <div className="tech-item">
-              <h4 className="text-lg font-semibold mb-2">People Management</h4>
-              <p className="text-sm opacity-80">Comprehensive member database with role preferences and availability tracking.</p>
-            </div>
-            <div className="tech-item">
-              <h4 className="text-lg font-semibold mb-2">Schedule View</h4>
-              <p className="text-sm opacity-80">Interactive calendar view with filtering by role or person, plus powerful search capabilities.</p>
-            </div>
-          </div>
-        </div>
-      </div>
       
       <footer className="py-12 text-center text-sm text-muted-foreground">
         © {new Date().getFullYear()} SabbathScribe. All rights reserved.
