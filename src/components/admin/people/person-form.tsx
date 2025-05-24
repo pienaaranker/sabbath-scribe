@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from "@/components/ui/checkbox";
-import { useAppContext } from '@/context/app-context';
+import { useFirestore } from '@/context/firestore-context';
 import type { Person, RoleId } from '@/types';
 import { ROLES_CONFIG } from '@/lib/constants';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -30,10 +30,10 @@ interface PersonFormProps {
 }
 
 export default function PersonForm({ person, onSuccess }: PersonFormProps) {
-  const { addPerson, updatePerson } = useAppContext();
+  const { addPerson, updatePerson } = useFirestore();
   const { toast } = useToast();
 
-  const { control, register, handleSubmit, formState: { errors }, setValue, watch } = useForm<PersonFormData>({
+  const { control, register, handleSubmit, formState: { errors, isSubmitting }, setValue, watch } = useForm<PersonFormData>({
     resolver: zodResolver(personSchema),
     defaultValues: {
       name: person?.name || '',
@@ -45,16 +45,16 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
 
   const selectedRoles = watch('fillableRoleIds') || [];
 
-  const onSubmit = (data: PersonFormData) => {
+  const onSubmit = async (data: PersonFormData) => {
     try {
       if (person) {
-        updatePerson({ ...person, ...data });
+        await updatePerson(person.id, data);
         toast({
           title: "Person Updated",
           description: `${data.name} has been successfully updated.`,
         });
       } else {
-        addPerson(data);
+        await addPerson(data);
         toast({
           title: "Person Added",
           description: `${data.name} has been successfully added.`,
@@ -120,7 +120,9 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
         <DialogClose asChild>
           <Button type="button" variant="outline">Cancel</Button>
         </DialogClose>
-        <Button type="submit" variant="secondary">{person ? 'Update Person' : 'Add Person'}</Button>
+        <Button type="submit" variant="secondary" disabled={isSubmitting}>
+          {isSubmitting ? 'Processing...' : (person ? 'Update Person' : 'Add Person')}
+        </Button>
       </DialogFooter>
     </form>
   );

@@ -5,7 +5,6 @@
 - Schedule View: Displays the schedule for the current Sabbath and allows navigation to future Sabbaths.
 - Admin Panel: Allows administrators to add, edit, and remove individuals and roles.
 - User Schedule: Provides a searchable view of the schedule filtered by role, person, or date.
-- Suggested Assignments: Uses an AI tool to generate suggested assignments based on availability and role preferences.
 
 ## Style Guidelines:
 

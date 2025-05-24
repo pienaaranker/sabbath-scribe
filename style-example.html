@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SabbathScribe - Church Roster Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 80px 0;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.2);
+            z-index: -1;
+        }
+
+        .hero h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            backdrop-filter: blur(10px);
+            padding: 10px 25px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.3);
+            margin-bottom: 40px;
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .main-content {
+            background: white;
+            border-radius: 20px 20px 0 0;
+            margin-top: -40px;
+            position: relative;
+            z-index: 1;
+            box-shadow: 0 -10px 30px rgba(0,0,0,0.1);
+        }
+
+        .section {
+            padding: 60px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .section:last-child {
+            border-bottom: none;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            font-weight: 600;
+            margin-bottom: 40px;
+            text-align: center;
+            color: #2c3e50;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: '';
+            display: block;
+            width: 60px;
+            height: 4px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            margin: 15px auto;
+            border-radius: 2px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border: 1px solid #e8ecff;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+        }
+
+        .feature-card p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .tech-stack {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: white;
+            padding: 60px 0;
+            margin: 0 -20px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .tech-item {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .tech-item:hover {
+            background: rgba(255,255,255,0.2);
+            transform: scale(1.05);
+        }
+
+        .file-structure {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            font-family: 'Courier New', monospace;
+            margin-top: 30px;
+            border-left: 4px solid #667eea;
+            overflow-x: auto;
+        }
+
+        .folder {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .file {
+            color: #2c3e50;
+            margin-left: 20px;
+        }
+
+        .data-models {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .model-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .model-card:hover {
+            border-color: #667eea;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .model-card h4 {
+            color: #667eea;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+
+        .model-card ul {
+            list-style: none;
+        }
+
+        .model-card li {
+            padding: 5px 0;
+            color: #666;
+            border-left: 2px solid #f8f9fa;
+            padding-left: 10px;
+            margin: 5px 0;
+        }
+
+        .cta-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 0;
+            margin: 0 -20px;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #667eea;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .floating-elements {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .floating-element {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .floating-element:nth-child(1) {
+            top: 20%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+
+        .floating-element:nth-child(2) {
+            top: 60%;
+            left: 80%;
+            animation-delay: 2s;
+        }
+
+        .floating-element:nth-child(3) {
+            top: 40%;
+            left: 60%;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .section-title {
+                font-size: 2rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 0 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hero">
+        <div class="floating-elements">
+            <div class="floating-element"></div>
+            <div class="floating-element"></div>
+            <div class="floating-element"></div>
+        </div>
+        <div class="container">
+            <div class="hero-badge">Church Management Solution</div>
+            <h1>SabbathScribe</h1>
+            <p>Effortless Church Roster Management for Your Team</p>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
+            <!-- Key Features Section -->
+            <section class="section">
+                <h2 class="section-title">Key Features</h2>
+                <div class="features-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path>
+                                <path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path>
+                            </svg>
+                        </div>
+                        <h3>Role Assignment</h3>
+                        <p>Efficiently assign church members to various roles like Preacher, Elder on Duty, and Sabbath School Hosts for each Sabbath service.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/>
+                            </svg>
+                        </div>
+                        <h3>People Management</h3>
+                        <p>Comprehensive member database with contact information, role preferences, and availability tracking.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V10h14v10zM9 14H7v-2h2v2zm4 0h-2v-2h2v2zm4 0h-2v-2h2v2z"/>
+                            </svg>
+                        </div>
+                        <h3>Schedule View</h3>
+                        <p>Interactive calendar view with filtering by role or person, plus powerful search capabilities for easy navigation.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                                <path d="M21 10.12h-6.78l2.74-2.82c-2.73-2.7-7.15-2.8-9.88-.1-2.73 2.71-2.73 7.08 0 9.79s7.15 2.71 9.88 0C18.32 15.65 19 14.08 19 12.1h2c0 1.98-.88 4.55-2.64 6.29-3.51 3.48-9.21 3.48-12.72 0-3.5-3.47-3.53-9.11-.02-12.58s9.14-3.47 12.65 0L21 3v7.12zM12.5 8v4.25l3.5 2.08-.72 1.21L11 13V8h1.5z"/>
+                            </svg>
+                        </div>
+                        <h3>AI Suggestions</h3>
+                        <p>Smart assignment recommendations based on member availability, assignment history, and role preferences.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Data Models Section -->
+            <section class="section">
+                <h2 class="section-title">Data Architecture</h2>
+                <div class="data-models">
+                    <div class="model-card">
+                        <h4>Person</h4>
+                        <ul>
+                            <li><strong>id:</strong> Unique identifier</li>
+                            <li><strong>name:</strong> Full name</li>
+                            <li><strong>contactInfo:</strong> Phone/email</li>
+                            <li><strong>fillableRoleIds:</strong> Qualified roles</li>
+                            <li><strong>unavailableDates:</strong> Blackout dates</li>
+                        </ul>
+                    </div>
+                    <div class="model-card">
+                        <h4>Role</h4>
+                        <ul>
+                            <li><strong>id:</strong> Unique identifier</li>
+                            <li><strong>name:</strong> Role title</li>
+                            <li><strong>description:</strong> Role details</li>
+                        </ul>
+                    </div>
+                    <div class="model-card">
+                        <h4>Assignment</h4>
+                        <ul>
+                            <li><strong>id:</strong> Unique identifier</li>
+                            <li><strong>date:</strong> Sabbath date</li>
+                            <li><strong>roleId:</strong> Assigned role</li>
+                            <li><strong>personId:</strong> Assigned person</li>
+                        </ul>
+                    </div>
+                    <div class="model-card">
+                        <h4>SabbathAssignment</h4>
+                        <ul>
+                            <li><strong>roleId:</strong> Role identifier</li>
+                            <li><strong>roleName:</strong> Display name</li>
+                            <li><strong>person:</strong> Assigned member</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Technology Stack Section -->
+            <div class="tech-stack">
+                <div class="container">
+                    <h2 class="section-title" style="color: white;">Technology Stack</h2>
+                    <div class="tech-grid">
+                        <div class="tech-item">
+                            <h4>Next.js</h4>
+                            <p>React framework with App Router</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>TypeScript</h4>
+                            <p>Type-safe development</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Modern UI</h4>
+                            <p>Component-based design system</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Smart Features</h4>
+                            <p>Intelligent roster management</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Responsive</h4>
+                            <p>Mobile-first design</p>
+                        </div>
+                        <div class="tech-item">
+                            <h4>Context API</h4>
+                            <p>Global state management</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Project Structure Section -->
+            <section class="section">
+                <h2 class="section-title">Project Structure</h2>
+                <div class="file-structure">
+                    <div class="folder">src/</div>
+                    <div class="file">├── app/ <span style="color: #666;">// Next.js App Router pages</span></div>
+                    <div class="file">│   ├── page.tsx <span style="color: #666;">// Main schedule view</span></div>
+                    <div class="file">│   └── admin/ <span style="color: #666;">// Admin interface</span></div>
+                    <div class="file">│       ├── assignments/ <span style="color: #666;">// Assignment management</span></div>
+                    <div class="file">│       └── people/ <span style="color: #666;">// Member management</span></div>
+                    <div class="file">├── components/ <span style="color: #666;">// Reusable UI components</span></div>
+                    <div class="file">│   ├── admin/ <span style="color: #666;">// Admin-specific components</span></div>
+                    <div class="file">│   ├── layout/ <span style="color: #666;">// Layout components</span></div>
+                    <div class="file">│   ├── schedule/ <span style="color: #666;">// Schedule display components</span></div>
+                    <div class="file">│   └── ui/ <span style="color: #666;">// Base UI components</span></div>
+                    <div class="file">├── context/ <span style="color: #666;">// Global state management</span></div>
+                    <div class="file">│   └── app-context.tsx</div>
+                    <div class="file">├── types/ <span style="color: #666;">// TypeScript definitions</span></div>
+                    <div class="file">│   └── index.ts</div>
+                    <div class="file">└── lib/ <span style="color: #666;">// Utility functions</span></div>
+                </div>
+            </section>
+
+            <!-- Call to Action Section -->
+            <div class="cta-section">
+                <div class="container">
+                    <h2 style="font-size: 2.5rem; margin-bottom: 20px;">Ready to Streamline Your Church Management?</h2>
+                    <p style="font-size: 1.2rem; margin-bottom: 40px; opacity: 0.9;">SabbathScribe makes church roster management effortless with intelligent automation and intuitive design.</p>
+                    <a href="#" class="cta-button">Get Started Today</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Add smooth scrolling animation
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.feature-card, .model-card');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach((entry, index) => {
+                    if (entry.isIntersecting) {
+                        setTimeout(() => {
+                            entry.target.style.opacity = '1';
+                            entry.target.style.transform = 'translateY(0)';
+                        }, index * 100);
+                    }
+                });
+            });
+
+            cards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                card.style.transition = 'all 0.6s ease';
+                observer.observe(card);
+            });
+
+            // Add dynamic floating elements
+            const hero = document.querySelector('.hero');
+            setInterval(() => {
+                const element = document.createElement('div');
+                element.className = 'floating-element';
+                element.style.left = Math.random() * 100 + '%';
+                element.style.top = Math.random() * 100 + '%';
+                element.style.animationDelay = Math.random() * 2 + 's';
+                hero.querySelector('.floating-elements').appendChild(element);
+                
+                setTimeout(() => element.remove(), 6000);
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

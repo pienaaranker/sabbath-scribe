@@ -3,22 +3,20 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { useAppContext } from '@/context/app-context';
+import { useFirestore } from '@/context/firestore-context';
 import { ROLES_CONFIG, ROLE_NAMES_MAP } from '@/lib/constants';
 import type { Person, RoleId, Assignment, SabbathAssignment } from '@/types';
 import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb } from '@/lib/date-utils';
-import { ChevronLeft, ChevronRight, CalendarIcon, Edit, Users, ListChecks } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CalendarIcon, Edit, Users, Clipboard } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import AssignPersonDialog from './assign-person-dialog';
-import SuggestAssignmentsDialog from './suggest-assignments-dialog'; // Import the new component
 import { useToast } from '@/hooks/use-toast';
 
 export default function AssignmentManagementClient() {
-  const { people, assignments, getAssignmentsForDate, getPersonById, assignPersonToRole, isLoading } = useAppContext();
+  const { people, getAssignmentsForDate, getPersonById, addAssignment, updateAssignment, deleteAssignment, loading, error } = useFirestore();
   const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
   const [isAssignDialogOpen, setIsAssignDialogOpen] = useState(false);
-  const [isSuggestDialogOpen, setIsSuggestDialogOpen] = useState(false); // State for suggestion dialog
   const [currentAssignmentTarget, setCurrentAssignmentTarget] = useState<{ date: string; roleId: RoleId } | null>(null);
   const { toast } = useToast();
 
@@ -46,36 +44,80 @@ export default function AssignmentManagementClient() {
     setIsAssignDialogOpen(true);
   };
 
-  const handleAssignmentSave = (personId: string | null) => {
-    if (currentAssignmentTarget) {
-      assignPersonToRole(currentAssignmentTarget.date, currentAssignmentTarget.roleId, personId);
+  const handleAssignmentSave = async (personId: string | null) => {
+    if (!currentAssignmentTarget) return;
+
+    try {
+      const existingAssignments = getAssignmentsForDate(currentAssignmentTarget.date);
+      const existingAssignment = existingAssignments.find(a => a.roleId === currentAssignmentTarget.roleId);
+
+      if (personId === null) {
+        // Remove assignment
+        if (existingAssignment) {
+          await deleteAssignment(existingAssignment.id);
+        }
+      } else {
+        if (existingAssignment) {
+          // Update existing assignment
+          await updateAssignment(existingAssignment.id, { personId });
+        } else {
+          // Create new assignment
+          await addAssignment({
+            date: currentAssignmentTarget.date,
+            roleId: currentAssignmentTarget.roleId,
+            personId
+          });
+        }
+      }
+
       toast({
         title: "Assignment Updated",
         description: `${ROLE_NAMES_MAP[currentAssignmentTarget.roleId]} assignment has been updated for ${formatDateForDisplay(currentAssignmentTarget.date)}.`,
       });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to update assignment. Please try again.",
+        variant: "destructive",
+      });
     }
+
     setIsAssignDialogOpen(false);
     setCurrentAssignmentTarget(null);
   };
   
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#suggest") {
-      setIsSuggestDialogOpen(true);
       // Optionally remove the hash
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
     }
   }, []);
 
 
-  if (isLoading) {
-    return <p>Loading assignment data...</p>;
+  if (loading) {
+    return (
+      <div className="text-center py-20">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+        <p className="text-muted-foreground">Loading assignment data...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-20">
+        <p className="text-destructive mb-4">{error}</p>
+        <Button onClick={() => window.location.reload()}>Try Again</Button>
+      </div>
+    );
   }
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div className="bg-white rounded-xl shadow-lg p-6">
+        <div className="mb-6">
+          <h2 className="section-title">Date Selection</h2>
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" onClick={() => setSelectedDate(getPreviousSabbath(selectedDate))} aria-label="Previous Sabbath">
                 <ChevronLeft className="h-5 w-5" />
@@ -101,35 +143,42 @@ export default function AssignmentManagementClient() {
                 <ChevronRight className="h-5 w-5" />
               </Button>
             </div>
-            <Button onClick={() => setIsSuggestDialogOpen(true)} variant="secondary">
-              <ListChecks className="mr-2 h-4 w-4" /> Suggest Assignments (AI)
-            </Button>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {ROLES_CONFIG.map((role) => {
-              const assignedPerson = sabbathAssignmentsMap.get(role.id);
-              const isUnassigned = !assignedPerson;
-              return (
-                <Card key={role.id} className={`p-4 flex justify-between items-center ${isUnassigned ? "bg-muted/50 border-dashed" : ""}`}>
-                  <div>
-                    <p className="font-semibold text-primary">{role.name}</p>
-                    {assignedPerson ? (
-                      <p className="text-sm text-foreground flex items-center gap-1"><Users className="h-3 w-3 text-muted-foreground"/> {assignedPerson.name}</p>
-                    ) : (
-                      <p className="text-sm text-destructive">Not Assigned</p>
-                    )}
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {ROLES_CONFIG.map((role) => {
+            const assignedPerson = sabbathAssignmentsMap.get(role.id);
+            const isUnassigned = !assignedPerson;
+            const cardClass = isUnassigned ? "bg-card border-destructive/30" : "feature-card";
+            
+            return (
+              <div key={role.id} className={cardClass}>
+                <div className="feature-icon">
+                  <Clipboard className="h-5 w-5" />
+                </div>
+                <h3 className="text-base font-semibold text-primary truncate mb-2">{role.name}</h3>
+                {assignedPerson ? (
+                  <div className="flex items-center gap-2 mb-4">
+                    <Users className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-sm text-secondary-foreground font-medium">{assignedPerson.name}</p>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => openAssignDialog(role.id)}>
-                    <Edit className="mr-2 h-3 w-3" /> {assignedPerson ? 'Change' : 'Assign'}
-                  </Button>
-                </Card>
-              );
-            })}
-          </div>
-        </CardContent>
-      </Card>
+                ) : (
+                  <p className="text-sm text-destructive font-semibold mb-4">Not Assigned</p>
+                )}
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  onClick={() => openAssignDialog(role.id)}
+                  className="w-full"
+                >
+                  <Edit className="mr-2 h-3 w-3" /> {assignedPerson ? 'Change' : 'Assign'}
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
 
       {currentAssignmentTarget && (
         <AssignPersonDialog
@@ -142,12 +191,6 @@ export default function AssignmentManagementClient() {
           people={people}
         />
       )}
-      
-      <SuggestAssignmentsDialog
-        isOpen={isSuggestDialogOpen}
-        onClose={() => setIsSuggestDialogOpen(false)}
-        targetDate={formattedDate}
-      />
     </div>
   );
 }

@@ -1,16 +1,15 @@
-
 "use client";
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAppContext } from '@/context/app-context';
+import { useFirestore } from '@/context/firestore-context';
 import { ROLES_CONFIG, ROLE_NAMES_MAP } from '@/lib/constants';
 import type { Person, SabbathAssignment, RoleId } from '@/types';
 import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb } from '@/lib/date-utils';
-import { ChevronLeft, ChevronRight, Users, CalendarIcon, Filter, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Users, CalendarIcon, Filter, Search, Clipboard, User, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import Image from 'next/image';
@@ -20,56 +19,41 @@ const ALL_PEOPLE_FILTER_VALUE = "all_people_filter_val";
 
 const AssignmentDisplayCard: React.FC<{ assignment: SabbathAssignment, isUnassigned: boolean }> = ({ assignment, isUnassigned }) => {
   const cardClasses = isUnassigned 
-    ? "bg-destructive/10 border-destructive/30" 
-    : "bg-card";
+    ? "bg-card border-destructive/30" 
+    : "feature-card";
   const personNameClasses = isUnassigned ? "text-destructive font-semibold" : "text-secondary-foreground font-medium";
 
   return (
-    <Card className={`shadow-lg hover:shadow-xl transition-shadow duration-300 ${cardClasses}`}>
-      <CardHeader className="pb-2 pt-4 px-4">
-        <CardTitle className="text-base font-semibold text-primary truncate">{assignment.roleName}</CardTitle>
-      </CardHeader>
-      <CardContent className="px-4 pb-4">
-        {assignment.person ? (
-          <div className="flex items-center gap-2">
-            <Users className="h-4 w-4 text-muted-foreground" />
-            <p className={`text-sm ${personNameClasses}`}>{assignment.person.name}</p>
-          </div>
-        ) : (
-          <p className={`text-sm ${personNameClasses}`}>Not Assigned</p>
-        )}
-      </CardContent>
-    </Card>
+    <div className={cardClasses}>
+      <div className="feature-icon">
+        <Clipboard className="h-5 w-5" />
+      </div>
+      <h3 className="text-base font-semibold text-primary truncate mb-2">{assignment.roleName}</h3>
+      {assignment.person ? (
+        <div className="flex items-center gap-2">
+          <Users className="h-4 w-4 text-muted-foreground" />
+          <p className={`text-sm ${personNameClasses}`}>{assignment.person.name}</p>
+        </div>
+      ) : (
+        <p className={`text-sm ${personNameClasses}`}>Not Assigned</p>
+      )}
+    </div>
   );
 };
 
 
 export default function SabbathViewClient() {
-  const { getAssignmentsForDate, getPersonById, people, isLoading } = useAppContext();
+  const { people, getSabbathAssignments, loading, error } = useFirestore();
   const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
   const [filterRole, setFilterRole] = useState<string>(''); // Empty string for "All" or placeholder
   const [filterPerson, setFilterPerson] = useState<string>(''); // Empty string for "All" or placeholder
   const [searchTerm, setSearchTerm] = useState<string>('');
-
-  useEffect(() => {
-    // If initial assignments are for a different date, update selectedDate
-    // This is a placeholder, real logic might depend on how initial date is determined
-  }, []);
   
   const formattedDate = useMemo(() => formatDateForDb(selectedDate), [selectedDate]);
 
   const sabbathAssignments = useMemo(() => {
-    const assignmentsForDate = getAssignmentsForDate(formattedDate);
-    return ROLES_CONFIG.map((role) => {
-      const assignment = assignmentsForDate.find((a) => a.roleId === role.id);
-      const person = assignment?.personId ? getPersonById(assignment.personId) : null;
-      return {
-        roleId: role.id,
-        roleName: role.name,
-        person: person || null,
-      };
-    });
-  }, [formattedDate, getAssignmentsForDate, getPersonById]);
+    return getSabbathAssignments(formattedDate);
+  }, [formattedDate, getSabbathAssignments]);
 
   const filteredAssignments = useMemo(() => {
     return sabbathAssignments.filter(assignment => {
@@ -90,14 +74,34 @@ export default function SabbathViewClient() {
     }
   };
 
-  if (isLoading) {
-    return <div className="text-center py-10">Loading schedule...</div>;
+  if (loading) {
+    return (
+      <div className="container">
+        <div className="text-center py-20">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading schedule...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container">
+        <div className="text-center py-20">
+          <p className="text-destructive mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <Card className="shadow-xl">
-      <CardHeader className="bg-muted/50">
-        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+    <div className="container">
+      <section className="section">
+        <h2 className="section-title">Sabbath Schedule</h2>
+        
+        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
           <div className="flex items-center gap-2">
             <Button variant="outline" size="icon" onClick={() => setSelectedDate(getPreviousSabbath(selectedDate))} aria-label="Previous Sabbath">
               <ChevronLeft className="h-5 w-5" />
@@ -110,7 +114,7 @@ export default function SabbathViewClient() {
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
+                <CalendarComponent
                   mode="single"
                   selected={selectedDate}
                   onSelect={handleDateChange}
@@ -123,11 +127,10 @@ export default function SabbathViewClient() {
               <ChevronRight className="h-5 w-5" />
             </Button>
           </div>
-          <h2 className="text-xl sm:text-2xl font-bold text-primary">
-            Sabbath Schedule
-          </h2>
         </div>
-        <div className="mt-4 flex flex-col sm:flex-row gap-2 items-center border-t pt-4">
+        
+        <div className="bg-muted/30 p-4 rounded-lg mb-8">
+          <div className="flex flex-col sm:flex-row gap-2 items-center">
             <div className="flex items-center gap-1 w-full sm:w-auto">
               <Filter className="h-4 w-4 text-muted-foreground" />
               <Select value={filterRole} onValueChange={(value) => setFilterRole(value === ALL_ROLES_FILTER_VALUE ? '' : value)}>
@@ -143,7 +146,7 @@ export default function SabbathViewClient() {
               </Select>
             </div>
             <div className="flex items-center gap-1 w-full sm:w-auto">
-               <Users className="h-4 w-4 text-muted-foreground" />
+              <Users className="h-4 w-4 text-muted-foreground" />
               <Select value={filterPerson} onValueChange={(value) => setFilterPerson(value === ALL_PEOPLE_FILTER_VALUE ? '' : value)}>
                 <SelectTrigger className="w-full sm:w-[180px]">
                   <SelectValue placeholder="Filter by Person" />
@@ -166,11 +169,11 @@ export default function SabbathViewClient() {
                 className="w-full"
               />
             </div>
+          </div>
         </div>
-      </CardHeader>
-      <CardContent className="p-4 md:p-6">
+        
         {filteredAssignments.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          <div className="features-grid">
             {filteredAssignments.map((assignment) => (
               <AssignmentDisplayCard 
                 key={assignment.roleId} 
@@ -186,8 +189,41 @@ export default function SabbathViewClient() {
             <p>Try adjusting the date or clearing filters.</p>
           </div>
         )}
-      </CardContent>
-    </Card>
+      </section>
+      
+      <div className="tech-stack">
+        <div className="container">
+          <h2 className="section-title" style={{color: 'white'}}>Key Features</h2>
+          <div className="tech-grid">
+            <div className="tech-item">
+              <div className="feature-icon mx-auto mb-4" style={{width: '48px', height: '48px'}}>
+                <Clipboard className="h-6 w-6" />
+              </div>
+              <h4 className="text-lg font-semibold mb-2">Role Assignment</h4>
+              <p className="text-sm opacity-80">Efficiently assign church members to various roles for each Sabbath service.</p>
+            </div>
+            <div className="tech-item">
+              <div className="feature-icon mx-auto mb-4" style={{width: '48px', height: '48px'}}>
+                <User className="h-6 w-6" />
+              </div>
+              <h4 className="text-lg font-semibold mb-2">People Management</h4>
+              <p className="text-sm opacity-80">Comprehensive member database with role preferences and availability tracking.</p>
+            </div>
+            <div className="tech-item">
+              <div className="feature-icon mx-auto mb-4" style={{width: '48px', height: '48px'}}>
+                <Calendar className="h-6 w-6" />
+              </div>
+              <h4 className="text-lg font-semibold mb-2">Schedule View</h4>
+              <p className="text-sm opacity-80">Interactive calendar view with filtering by role or person, plus powerful search capabilities.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <footer className="py-12 text-center text-sm text-muted-foreground">
+        © {new Date().getFullYear()} SabbathScribe. All rights reserved.
+      </footer>
+    </div>
   );
 }
 
