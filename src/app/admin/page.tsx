@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Users, CalendarDays } from "lucide-react";
 import Image from "next/image";
 
 export default function AdminDashboardPage() {
@@ -16,7 +15,6 @@ export default function AdminDashboardPage() {
           <DashboardActionCard
             title="Manage People"
             description="Add, edit, or remove individuals who can be assigned to roles."
-            icon={<Users className="h-8 w-8 text-white" />}
             link="/admin/people"
             actionText="Go to People"
             imageSrc="/people.jpeg"
@@ -26,7 +24,6 @@ export default function AdminDashboardPage() {
           <DashboardActionCard
             title="Manage Assignments"
             description="Assign roles for specific Sabbaths and view upcoming schedules."
-            icon={<CalendarDays className="h-8 w-8 text-white" />}
             link="/admin/assignments"
             actionText="Go to Assignments"
             imageSrc="/clipboard.jpeg"
@@ -42,7 +39,6 @@ export default function AdminDashboardPage() {
 interface DashboardActionCardProps {
   title: string;
   description: string;
-  icon: React.ReactNode;
   link: string;
   actionText: string;
   imageSrc: string;
@@ -50,16 +46,13 @@ interface DashboardActionCardProps {
   dataAiHint: string;
 }
 
-function DashboardActionCard({ title, description, icon, link, actionText, imageSrc, imageAlt, dataAiHint }: DashboardActionCardProps) {
+function DashboardActionCard({ title, description, link, actionText, imageSrc, imageAlt, dataAiHint }: DashboardActionCardProps) {
   return (
     <div className="feature-card overflow-hidden flex flex-col h-full">
       <div className="relative w-full h-40">
         <Image src={imageSrc} alt={imageAlt} layout="fill" objectFit="cover" data-ai-hint={dataAiHint} />
       </div>
-      <div className="feature-icon absolute right-6 -mt-6">
-        {icon}
-      </div>
-      <div className="p-6 pt-10 flex-grow">
+      <div className="p-6 flex-grow">
         <h3 className="text-xl font-semibold mb-2">{title}</h3>
         <p className="text-muted-foreground mb-6">{description}</p>
       </div>

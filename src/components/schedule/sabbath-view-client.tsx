@@ -25,13 +25,9 @@ const AssignmentDisplayCard: React.FC<{ assignment: SabbathAssignment, isUnassig
 
   return (
     <div className={cardClasses}>
-      <div className="feature-icon">
-        <Clipboard className="h-5 w-5" />
-      </div>
       <h3 className="text-base font-semibold text-primary truncate mb-2">{assignment.roleName}</h3>
       {assignment.person ? (
         <div className="flex items-center gap-2">
-          <Users className="h-4 w-4 text-muted-foreground" />
           <p className={`text-sm ${personNameClasses}`}>{assignment.person.name}</p>
         </div>
       ) : (
@@ -196,23 +192,14 @@ export default function SabbathViewClient() {
           <h2 className="section-title" style={{color: 'white'}}>Key Features</h2>
           <div className="tech-grid">
             <div className="tech-item">
-              <div className="feature-icon mx-auto mb-4" style={{width: '48px', height: '48px'}}>
-                <Clipboard className="h-6 w-6" />
-              </div>
               <h4 className="text-lg font-semibold mb-2">Role Assignment</h4>
               <p className="text-sm opacity-80">Efficiently assign church members to various roles for each Sabbath service.</p>
             </div>
             <div className="tech-item">
-              <div className="feature-icon mx-auto mb-4" style={{width: '48px', height: '48px'}}>
-                <User className="h-6 w-6" />
-              </div>
               <h4 className="text-lg font-semibold mb-2">People Management</h4>
               <p className="text-sm opacity-80">Comprehensive member database with role preferences and availability tracking.</p>
             </div>
             <div className="tech-item">
-              <div className="feature-icon mx-auto mb-4" style={{width: '48px', height: '48px'}}>
-                <Calendar className="h-6 w-6" />
-              </div>
               <h4 className="text-lg font-semibold mb-2">Schedule View</h4>
               <p className="text-sm opacity-80">Interactive calendar view with filtering by role or person, plus powerful search capabilities.</p>
             </div>
