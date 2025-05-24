@@ -92,6 +92,8 @@ export const scheduleService = {
   },
   
   async create(userId: string, schedule: Omit<Schedule, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>): Promise<string> {
+    console.log('[scheduleService.create] userId:', userId);
+    console.log('[scheduleService.create] input schedule:', JSON.stringify(schedule, null, 2));
     // Clean up any undefined values since Firestore doesn't support them
     const cleanSchedule = Object.fromEntries(
       Object.entries({
@@ -101,36 +103,33 @@ export const scheduleService = {
           : [userId],
       }).filter(([_, value]) => value !== undefined)
     );
-    
+    console.log('[scheduleService.create] cleanSchedule:', JSON.stringify(cleanSchedule, null, 2));
     const newSchedule = {
       ...cleanSchedule,
       ownerId: userId,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp()
     };
-    
-    const docRef = await addDoc(collection(db, COLLECTIONS.SCHEDULES), newSchedule);
-    
-    // Add the owner as a member with owner role
-    const userSnapshot = await getDoc(doc(db, 'users', userId));
-    let email = '';
-    let displayName = '';
-    
-    if (userSnapshot.exists()) {
-      const userData = userSnapshot.data();
-      email = userData.email || '';
-      displayName = userData.displayName || '';
+    console.log('[scheduleService.create] newSchedule (to Firestore):', JSON.stringify({
+      ...newSchedule,
+      createdAt: '[serverTimestamp]',
+      updatedAt: '[serverTimestamp]'
+    }, null, 2));
+    console.log('[scheduleService.create] About to call addDoc with payload:', JSON.stringify(newSchedule, null, 2));
+    try {
+      const docRef = await addDoc(collection(db, COLLECTIONS.SCHEDULES), newSchedule);
+      console.log('[scheduleService.create] Schedule document created with ID:', docRef.id);
+      // Add a delay to allow Firestore to propagate the new document for security rules
+      await new Promise(res => setTimeout(res, 1000));
+      return docRef.id;
+    } catch (err) {
+      console.error('[scheduleService.create] Error creating schedule:', err, {
+        userId,
+        ownerId: newSchedule.ownerId,
+        payload: newSchedule
+      });
+      throw err;
     }
-    
-    await setDoc(doc(db, COLLECTIONS.SCHEDULES, docRef.id, COLLECTIONS.MEMBERS, userId), {
-      userId,
-      email,
-      displayName,
-      role: 'owner',
-      addedAt: serverTimestamp()
-    });
-    
-    return docRef.id;
   },
   
   async update(scheduleId: string, schedule: Partial<Omit<Schedule, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>>): Promise<void> {

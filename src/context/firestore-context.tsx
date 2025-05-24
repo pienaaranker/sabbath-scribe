@@ -77,6 +77,22 @@ interface FirestoreProviderProps {
   children: React.ReactNode;
 }
 
+// Utility: Retry with delay
+async function retryWithDelay<T>(fn: () => Promise<T>, retries = 5, delay = 1000): Promise<T> {
+  let lastError;
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn();
+    } catch (err) {
+      lastError = err;
+      if (i < retries - 1) {
+        await new Promise(res => setTimeout(res, delay));
+      }
+    }
+  }
+  throw lastError;
+}
+
 export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }) => {
   const [schedules, setSchedules] = useState<Schedule[]>([]);
   const [currentSchedule, setCurrentSchedule] = useState<Schedule | null>(null);
@@ -222,25 +238,41 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
 
   // Schedule operations
   const addSchedule = async (schedule: Omit<Schedule, 'id' | 'ownerId' | 'createdAt' | 'updatedAt'>): Promise<string> => {
-    if (!user) throw new Error('User must be authenticated to create a schedule');
+    console.log('[addSchedule] called with:', schedule);
+    if (!user) {
+      console.error('[addSchedule] No authenticated user');
+      throw new Error('User must be authenticated to create a schedule');
+    }
     
     try {
+      console.log('[addSchedule] Creating schedule for user:', user.uid);
       const scheduleId = await scheduleService.create(user.uid, schedule);
+      console.log('[addSchedule] Schedule created with ID:', scheduleId);
       
       // Defensive: Wait for schedule doc to exist before initializing subcollections
       let tries = 0;
       let scheduleDoc = null;
       while (tries < 5 && !scheduleDoc) {
         scheduleDoc = await scheduleService.getById(scheduleId);
-        if (!scheduleDoc) await new Promise(res => setTimeout(res, 200)); // wait 200ms
+        if (!scheduleDoc) {
+          console.warn(`[addSchedule] Schedule doc not found, retrying (${tries + 1}/5)`);
+          await new Promise(res => setTimeout(res, 200)); // wait 200ms
+        }
         tries++;
       }
-      if (!scheduleDoc) throw new Error('Schedule document not found after creation!');
+      if (!scheduleDoc) {
+        console.error('[addSchedule] Schedule document not found after creation!');
+        throw new Error('Schedule document not found after creation!');
+      }
+      console.log('[addSchedule] Schedule document confirmed in Firestore:', scheduleDoc);
       
-      // Initialize default roles for the new schedule
-      await initializeScheduleRoles(scheduleId);
+      // Initialize default roles for the new schedule with retry logic
+      console.log('[addSchedule] Initializing default roles for schedule:', scheduleId);
+      await retryWithDelay(() => initializeScheduleRoles(scheduleId), 5, 2000);
+      console.log('[addSchedule] Default roles initialized for schedule:', scheduleId);
       
       // Only now refresh the schedules list and set the new schedule as current
+      console.log('[addSchedule] Refreshing user schedules for user:', user.uid);
       const userSchedules = await scheduleService.getAll(user.uid);
       setSchedules(userSchedules);
       
@@ -248,11 +280,14 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
       if (newSchedule) {
         setCurrentSchedule(newSchedule);
         localStorage.setItem('currentScheduleId', scheduleId);
+        console.log('[addSchedule] Set new schedule as current:', newSchedule);
+      } else {
+        console.warn('[addSchedule] New schedule not found in user schedules after refresh');
       }
       
       return scheduleId;
     } catch (err) {
-      console.error('Error adding schedule:', err);
+      console.error('[addSchedule] Error adding schedule:', err);
       throw err;
     }
   };
