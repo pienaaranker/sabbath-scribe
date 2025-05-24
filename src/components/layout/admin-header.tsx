@@ -57,7 +57,7 @@ export default function AdminHeader() {
             </Button>
             <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block bg-white/20" />
             <Button asChild className="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white">
-              <Link href="/"><Home className="mr-1 h-4 w-4" />Main Site</Link>
+              <Link href="/schedule"><Home className="mr-1 h-4 w-4" />Main Site</Link>
             </Button>
             <Button 
               onClick={handleLogout}

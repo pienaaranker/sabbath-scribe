@@ -177,7 +177,7 @@ export default function SabbathViewClient() {
             </div>
             
             {filteredAssignments.length > 0 ? (
-              <div className="features-grid">
+              <div className="flex flex-col gap-4">
                 {filteredAssignments.map((assignment) => (
                   <AssignmentDisplayCard 
                     key={assignment.roleId} 
@@ -274,26 +274,6 @@ export default function SabbathViewClient() {
           </div>
         </div>
       </section>
-      
-      <div className="tech-stack">
-        <div className="container">
-          <h2 className="section-title" style={{color: 'white'}}>Key Features</h2>
-          <div className="tech-grid">
-            <div className="tech-item">
-              <h4 className="text-lg font-semibold mb-2">Role Assignment</h4>
-              <p className="text-sm opacity-80">Efficiently assign church members to various roles for each Sabbath service.</p>
-            </div>
-            <div className="tech-item">
-              <h4 className="text-lg font-semibold mb-2">People Management</h4>
-              <p className="text-sm opacity-80">Comprehensive member database with role preferences and availability tracking.</p>
-            </div>
-            <div className="tech-item">
-              <h4 className="text-lg font-semibold mb-2">Schedule View</h4>
-              <p className="text-sm opacity-80">Interactive calendar view with filtering by role or person, plus powerful search capabilities.</p>
-            </div>
-          </div>
-        </div>
-      </div>
       
       <footer className="py-12 text-center text-sm text-muted-foreground">
         © {new Date().getFullYear()} SabbathScribe. All rights reserved.
