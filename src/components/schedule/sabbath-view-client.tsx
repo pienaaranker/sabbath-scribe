@@ -51,6 +51,25 @@ const AssignmentDisplayCard: React.FC<{ assignment: SabbathAssignment, isUnassig
   );
 };
 
+const getNextMonth = (date: Date): Date => {
+  const nextMonth = new Date(date);
+  nextMonth.setMonth(nextMonth.getMonth() + 1, 1);
+  // Find the first Saturday of the next month
+  while (nextMonth.getDay() !== 6) {
+    nextMonth.setDate(nextMonth.getDate() + 1);
+  }
+  return nextMonth;
+};
+
+const getPreviousMonth = (date: Date): Date => {
+  const prevMonth = new Date(date);
+  prevMonth.setMonth(prevMonth.getMonth() - 1, 1);
+  // Find the first Saturday of the previous month
+  while (prevMonth.getDay() !== 6) {
+    prevMonth.setDate(prevMonth.getDate() + 1);
+  }
+  return prevMonth;
+};
 
 export default function SabbathViewClient() {
   const { people, getSabbathAssignments, loading, error } = useFirestore();
@@ -111,94 +130,149 @@ export default function SabbathViewClient() {
       <section className="section">
         <h2 className="section-title">Sabbath Schedule</h2>
         
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-8">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => setSelectedDate(getPreviousSabbath(selectedDate))} aria-label="Previous Sabbath">
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button variant="outline" className="w-[260px] justify-start text-left font-normal">
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {formatDateForDisplay(selectedDate)}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <CalendarComponent
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateChange}
-                  initialFocus
-                  disabled={(date) => !isSaturday(date)} // Only allow Saturdays
-                />
-              </PopoverContent>
-            </Popover>
-            <Button variant="outline" size="icon" onClick={() => setSelectedDate(getNextSabbath(selectedDate))} aria-label="Next Sabbath">
-              <ChevronRight className="h-5 w-5" />
-            </Button>
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Main Content Column */}
+          <div className="lg:col-span-3">
+            <div className="bg-muted/30 p-4 rounded-lg mb-8">
+              <div className="flex flex-col sm:flex-row gap-2 items-center">
+                <div className="flex items-center gap-1 w-full sm:w-auto">
+                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Select value={filterRole} onValueChange={(value) => setFilterRole(value === ALL_ROLES_FILTER_VALUE ? '' : value)}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Filter by Role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL_ROLES_FILTER_VALUE}>All Roles</SelectItem>
+                      {ROLES_CONFIG.map(role => (
+                        <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-1 w-full sm:w-auto">
+                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Select value={filterPerson} onValueChange={(value) => setFilterPerson(value === ALL_PEOPLE_FILTER_VALUE ? '' : value)}>
+                    <SelectTrigger className="w-full sm:w-[180px]">
+                      <SelectValue placeholder="Filter by Person" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={ALL_PEOPLE_FILTER_VALUE}>All People</SelectItem>
+                      {people.map(person => (
+                        <SelectItem key={person.id} value={person.id}>{person.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center gap-1 w-full sm:flex-1">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <Input 
+                    type="search" 
+                    placeholder="Search by role or name..." 
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+            </div>
+            
+            {filteredAssignments.length > 0 ? (
+              <div className="features-grid">
+                {filteredAssignments.map((assignment) => (
+                  <AssignmentDisplayCard 
+                    key={assignment.roleId} 
+                    assignment={assignment} 
+                    isUnassigned={!assignment.person} 
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-10 text-muted-foreground">
+                <Image src="/clipboard.jpeg" alt="No assignments" width={300} height={200} className="mx-auto mb-4 rounded-md" data-ai-hint="empty state document" />
+                <p className="text-lg">No assignments found for this date or matching your filters.</p>
+                <p>Try adjusting the date or clearing filters.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Calendar Column */}
+          <div className="lg:col-span-1">
+            <div className="bg-card rounded-lg p-4 sticky top-4">
+              <div className="flex flex-col space-y-4">
+                {/* Date Navigation */}
+                <div className="flex items-center justify-between px-1">
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setSelectedDate(getPreviousMonth(selectedDate))}
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <p className="text-sm font-medium">
+                    {formatDateForDisplay(selectedDate)}
+                  </p>
+                  <Button 
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedDate(getNextMonth(selectedDate))}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Calendar Grid */}
+                <div className="space-y-4">
+                  {/* Month and Year */}
+                  <div className="text-center">
+                    <div className="font-medium">
+                      {selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
+                    </div>
+                  </div>
+
+                  {/* Days of Week */}
+                  <div className="grid grid-cols-7 gap-1 text-center">
+                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
+                      <div key={day} className="text-xs text-muted-foreground font-medium py-1">
+                        {day}
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Calendar Days */}
+                  <div className="grid grid-cols-7 gap-1 text-center">
+                    {Array.from({ length: 35 }, (_, i) => {
+                      const date = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), 1);
+                      const firstDay = date.getDay();
+                      const currentDay = i - firstDay + 1;
+                      date.setDate(currentDay);
+
+                      const isCurrentMonth = date.getMonth() === selectedDate.getMonth();
+                      const isSameDay = date.toDateString() === selectedDate.toDateString();
+                      const isSaturday = date.getDay() === 6;
+
+                      return (
+                        <button
+                          key={i}
+                          onClick={() => isSaturday && handleDateChange(date)}
+                          disabled={!isSaturday}
+                          className={`
+                            p-2 text-sm rounded-md relative
+                            ${!isCurrentMonth && 'text-muted-foreground/50'}
+                            ${isSameDay && 'bg-primary text-primary-foreground'}
+                            ${isSaturday && !isSameDay && 'hover:bg-muted cursor-pointer'}
+                            ${!isSaturday && 'cursor-not-allowed opacity-50'}
+                          `}
+                        >
+                          {date.getDate()}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        
-        <div className="bg-muted/30 p-4 rounded-lg mb-8">
-          <div className="flex flex-col sm:flex-row gap-2 items-center">
-            <div className="flex items-center gap-1 w-full sm:w-auto">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <Select value={filterRole} onValueChange={(value) => setFilterRole(value === ALL_ROLES_FILTER_VALUE ? '' : value)}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Filter by Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ALL_ROLES_FILTER_VALUE}>All Roles</SelectItem>
-                  {ROLES_CONFIG.map(role => (
-                    <SelectItem key={role.id} value={role.id}>{role.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-1 w-full sm:w-auto">
-              <Users className="h-4 w-4 text-muted-foreground" />
-              <Select value={filterPerson} onValueChange={(value) => setFilterPerson(value === ALL_PEOPLE_FILTER_VALUE ? '' : value)}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Filter by Person" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={ALL_PEOPLE_FILTER_VALUE}>All People</SelectItem>
-                  {people.map(person => (
-                    <SelectItem key={person.id} value={person.id}>{person.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="flex items-center gap-1 w-full sm:flex-1">
-              <Search className="h-4 w-4 text-muted-foreground" />
-              <Input 
-                type="search" 
-                placeholder="Search by role or name..." 
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
-            </div>
-          </div>
-        </div>
-        
-        {filteredAssignments.length > 0 ? (
-          <div className="features-grid">
-            {filteredAssignments.map((assignment) => (
-              <AssignmentDisplayCard 
-                key={assignment.roleId} 
-                assignment={assignment} 
-                isUnassigned={!assignment.person} 
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-10 text-muted-foreground">
-            <Image src="/clipboard.jpeg" alt="No assignments" width={300} height={200} className="mx-auto mb-4 rounded-md" data-ai-hint="empty state document" />
-            <p className="text-lg">No assignments found for this date or matching your filters.</p>
-            <p>Try adjusting the date or clearing filters.</p>
-          </div>
-        )}
       </section>
       
       <div className="tech-stack">
