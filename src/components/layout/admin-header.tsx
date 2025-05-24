@@ -45,7 +45,7 @@ export default function AdminHeader() {
           <div className="w-full sm:w-auto mb-3 sm:mb-0 bg-white/10 p-2 rounded-md">
             <ScheduleSelector />
           </div>
-          <nav className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
+          <nav className="flex items-center gap-1 sm:gap-2 flex-nowrap justify-center w-full">
             <Button variant="ghost" asChild className="text-white hover:bg-white/10">
               <Link href="/admin/roles"><BookmarkIcon className="mr-1 h-4 w-4" />Roles</Link>
             </Button>
@@ -57,12 +57,12 @@ export default function AdminHeader() {
             </Button>
             <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block bg-white/20" />
             <Button asChild className="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white">
-              <Link href="/schedule"><Home className="mr-1 h-4 w-4" />Main Site</Link>
+              <Link href="/admin"><Home className="mr-1 h-4 w-4" />Home</Link>
             </Button>
             <Button 
               onClick={handleLogout}
               variant="ghost" 
-              className="text-white hover:bg-white/10"
+              className="text-white hover:bg-white/10 ml-auto"
             >
               <LogOut className="mr-1 h-4 w-4" />Logout
             </Button>
