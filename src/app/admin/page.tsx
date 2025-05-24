@@ -159,6 +159,15 @@ export default function AdminDashboardPage() {
         {currentSchedule ? (
           <div className="features-grid">
             <DashboardActionCard
+              title="Manage Roles"
+              description="Create and customize roles that people can be assigned to."
+              link="/admin/roles"
+              actionText="Go to Roles"
+              imageSrc="/roles.jpeg"
+              imageAlt="Role management"
+              dataAiHint="role badges"
+            />
+            <DashboardActionCard
               title="Manage People"
               description="Add, edit, or remove individuals who can be assigned to roles."
               link="/admin/people"
@@ -175,15 +184,6 @@ export default function AdminDashboardPage() {
               imageSrc="/clipboard.jpeg"
               imageAlt="Assignment management"
               dataAiHint="calendar schedule"
-            />
-            <DashboardActionCard
-              title="Manage Roles"
-              description="Create and customize roles that people can be assigned to."
-              link="/admin/roles"
-              actionText="Go to Roles"
-              imageSrc="/roles.jpeg"
-              imageAlt="Role management"
-              dataAiHint="role badges"
             />
           </div>
         ) : (

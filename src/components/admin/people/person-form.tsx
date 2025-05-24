@@ -92,33 +92,42 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
         <p className="text-sm text-muted-foreground mb-2">
           Leave all unchecked if this person can fill any role.
         </p>
-        
-        <div className="grid grid-cols-2 gap-2">
-          {roles.map((role) => (
-            <div key={role.id} className="flex items-center space-x-2">
-              <Controller
-                name="fillableRoleIds"
-                control={control}
-                render={({ field }) => (
-                  <Checkbox
-                    id={`role-${role.id}`}
-                    checked={field.value?.includes(role.id)}
-                    onCheckedChange={(checked) => {
-                      const currentValues = field.value || [];
-                      const newValues = checked
-                        ? [...currentValues, role.id]
-                        : currentValues.filter((id) => id !== role.id);
-                      field.onChange(newValues);
-                    }}
-                  />
-                )}
-              />
-              <Label htmlFor={`role-${role.id}`} className="text-sm cursor-pointer">
-                {role.name}
-              </Label>
-            </div>
-          ))}
-        </div>
+
+        {roles.length === 0 ? (
+          <div className="text-center py-4">
+            <p className="text-muted-foreground mb-2">No roles have been added yet.</p>
+            <Button type="button" variant="outline" onClick={() => window.location.href = '/admin/roles'}>
+              Add Roles
+            </Button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-2">
+            {roles.map((role) => (
+              <div key={role.id} className="flex items-center space-x-2">
+                <Controller
+                  name="fillableRoleIds"
+                  control={control}
+                  render={({ field }) => (
+                    <Checkbox
+                      id={`role-${role.id}`}
+                      checked={field.value?.includes(role.id)}
+                      onCheckedChange={(checked) => {
+                        const currentValues = field.value || [];
+                        const newValues = checked
+                          ? [...currentValues, role.id]
+                          : currentValues.filter((id) => id !== role.id);
+                        field.onChange(newValues);
+                      }}
+                    />
+                  )}
+                />
+                <Label htmlFor={`role-${role.id}`} className="text-sm cursor-pointer">
+                  {role.name}
+                </Label>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
       <div className="flex justify-end">

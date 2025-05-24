@@ -47,16 +47,13 @@ export default function AdminHeader() {
           </div>
           <nav className="flex items-center gap-1 sm:gap-2 flex-wrap justify-center">
             <Button variant="ghost" asChild className="text-white hover:bg-white/10">
-              <Link href="/admin"><LayoutDashboard className="mr-1 h-4 w-4" />Dashboard</Link>
+              <Link href="/admin/roles"><BookmarkIcon className="mr-1 h-4 w-4" />Roles</Link>
             </Button>
             <Button variant="ghost" asChild className="text-white hover:bg-white/10">
               <Link href="/admin/people"><Users className="mr-1 h-4 w-4" />People</Link>
             </Button>
             <Button variant="ghost" asChild className="text-white hover:bg-white/10">
               <Link href="/admin/assignments"><CalendarDays className="mr-1 h-4 w-4" />Assignments</Link>
-            </Button>
-            <Button variant="ghost" asChild className="text-white hover:bg-white/10">
-              <Link href="/admin/roles"><BookmarkIcon className="mr-1 h-4 w-4" />Roles</Link>
             </Button>
             <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block bg-white/20" />
             <Button asChild className="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white">

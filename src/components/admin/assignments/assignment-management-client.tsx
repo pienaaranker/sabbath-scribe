@@ -99,6 +99,21 @@ export default function AssignmentManagementClient() {
     );
   }
 
+  if (people.length === 0 || roles.length === 0) {
+    return (
+      <div className="text-center py-20">
+        <h2 className="text-2xl font-bold mb-4">Cannot Assign Staff</h2>
+        <p className="text-muted-foreground mb-6">
+          You need to add both <span className="font-semibold">people</span> and <span className="font-semibold">roles</span> before you can assign staff to roles.
+        </p>
+        <div className="flex justify-center gap-4">
+          <Button onClick={() => window.location.href = '/admin/people'} variant="outline">Add People</Button>
+          <Button onClick={() => window.location.href = '/admin/roles'} variant="outline">Add Roles</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="bg-white rounded-xl shadow-lg p-6">

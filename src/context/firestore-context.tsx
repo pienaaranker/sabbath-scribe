@@ -411,10 +411,9 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
       if ('id' in role) {
         const roleId = role.id;
         // Create with a specific ID
-        await setDoc(doc(db, COLLECTIONS.SCHEDULES, currentSchedule.id, COLLECTIONS.ROLES, roleId), {
-          name: role.name,
-          description: role.description
-        });
+        const roleDoc: any = { name: role.name };
+        if (role.description !== undefined) roleDoc.description = role.description;
+        await setDoc(doc(db, COLLECTIONS.SCHEDULES, currentSchedule.id, COLLECTIONS.ROLES, roleId), roleDoc);
         setRoles(prev => [...prev, role as Role]);
         return roleId;
       } else {

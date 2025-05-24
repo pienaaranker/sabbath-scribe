@@ -1,6 +1,6 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -33,6 +33,8 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     register,
     handleSubmit,
     reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<RoleFormValues>({
     resolver: zodResolver(roleSchema),
@@ -43,13 +45,45 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
     },
   });
 
+  // --- Auto-generate ID from name when creating a new role ---
+  const nameValue = watch('name');
+  const idValue = watch('id');
+  const [idManuallyEdited, setIdManuallyEdited] = useState(false);
+  const prevNameRef = useRef(role?.name || '');
+
+  // Helper to generate the formatted id from name
+  const autoIdFromName = (name: string) =>
+    name
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '_')
+      .replace(/^_+|_+$/g, '');
+
+  useEffect(() => {
+    if (!role && !idManuallyEdited) {
+      // Only auto-update if the user hasn't manually edited the ID
+      setValue('id', autoIdFromName(nameValue));
+    }
+    prevNameRef.current = nameValue;
+  }, [nameValue, idManuallyEdited, role, setValue]);
+
+  // If the user edits the ID, stop auto-syncing only if it differs from the auto-generated value
+  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+    setValue('id', newValue);
+    if (newValue !== autoIdFromName(nameValue)) {
+      setIdManuallyEdited(true);
+    } else {
+      setIdManuallyEdited(false);
+    }
+  };
+
   const onSubmit = async (data: RoleFormValues) => {
     try {
       if (role) {
         // Update existing role
         await updateRole(role.id, {
           name: data.name,
-          description: data.description || null
+          description: data.description || undefined
         });
         toast({
           title: 'Role Updated',
@@ -59,11 +93,10 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
         // Add new role with ID
         // Use the ID from the form data as the role ID
         const roleData = {
-          id: data.id as RoleId,
+          id: data.id,
           name: data.name,
-          description: data.description || null
+          description: data.description || undefined
         };
-        
         await addRole(roleData);
         toast({
           title: 'Role Added',
@@ -86,22 +119,6 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="id">Role ID</Label>
-        <Input 
-          id="id" 
-          {...register('id')} 
-          disabled={!!role} // Disable editing ID for existing roles
-          placeholder="preacher"
-        />
-        {errors.id && <p className="text-destructive text-sm">{errors.id.message}</p>}
-        {!role && (
-          <p className="text-sm text-muted-foreground">
-            Use a simple identifier without spaces (e.g., "preacher", "elder_on_duty")
-          </p>
-        )}
-      </div>
-      
-      <div className="space-y-2">
         <Label htmlFor="name">Role Name</Label>
         <Input 
           id="name" 
@@ -109,6 +126,23 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
           placeholder="Preacher"
         />
         {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="id">Role ID</Label>
+        <Input 
+          id="id" 
+          {...register('id')} 
+          disabled={!!role} // Disable editing ID for existing roles
+          placeholder="preacher"
+          onChange={handleIdChange}
+        />
+        {errors.id && <p className="text-destructive text-sm">{errors.id.message}</p>}
+        {!role && (
+          <p className="text-sm text-muted-foreground">
+            Use a simple identifier without spaces (e.g., "preacher", "elder_on_duty"). This will be auto-filled as you type the name, but you can override it.
+          </p>
+        )}
       </div>
       
       <div className="space-y-2">
