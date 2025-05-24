@@ -2,12 +2,12 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import PeopleManagementClient from '@/components/admin/people/people-management-client';
+import RoleManagementClient from '@/components/admin/roles/role-management-client';
 import { useFirestore } from '@/context/firestore-context';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 
-export default function PeoplePage() {
+export default function RolesPage() {
   const router = useRouter();
   const { currentSchedule } = useFirestore();
 
@@ -23,7 +23,7 @@ export default function PeoplePage() {
         <div className="text-center py-12">
           <h2 className="text-2xl font-bold mb-4">No Schedule Selected</h2>
           <p className="text-muted-foreground mb-6">
-            Please select a schedule from the dropdown above to manage people.
+            Please select a schedule from the dropdown above to manage roles.
           </p>
           <Button onClick={() => router.push('/admin')} className="gradient-bg text-white border-0 hover:opacity-90">
             Return to Dashboard
@@ -40,7 +40,7 @@ export default function PeoplePage() {
           <ArrowLeft className="h-4 w-4" />
         </Button>
       </div>
-      <PeopleManagementClient />
+      <RoleManagementClient />
     </div>
   );
-}
+} 

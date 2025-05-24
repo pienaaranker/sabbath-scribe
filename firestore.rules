@@ -2,25 +2,80 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Allow authenticated users to read and write all documents
-    // This provides basic security while keeping the app functional
-    match /{document=**} {
-      allow read, write: if request.auth != null;
+    // Helper functions for access control
+    function isAuthenticated() {
+      return request.auth != null;
     }
     
-    // More granular rules for production (commented out for now):
-    //
-    // match /people/{personId} {
-    //   allow read, write: if request.auth != null;
-    // }
-    //
-    // match /assignments/{assignmentId} {
-    //   allow read, write: if request.auth != null;
-    // }
-    //
-    // match /roles/{roleId} {
-    //   allow read: if request.auth != null;
-    //   allow write: if request.auth != null && hasRole('admin');
-    // }
+    function isScheduleOwner(scheduleId) {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/schedules/$(scheduleId)).data.ownerId == request.auth.uid;
+    }
+    
+    function isScheduleAdmin(scheduleId) {
+      return isAuthenticated() && 
+        (isScheduleOwner(scheduleId) || 
+         request.auth.uid in get(/databases/$(database)/documents/schedules/$(scheduleId)).data.adminUserIds);
+    }
+    
+    function isMember(scheduleId, userId) {
+      return exists(/databases/$(database)/documents/schedules/$(scheduleId)/members/$(userId));
+    }
+    
+    // Base access for all authenticated users
+    match /{document=**} {
+      allow read, write: if false; // Default deny
+    }
+    
+    // Schedules collection - User can read all schedules they own or are admin of
+    match /schedules/{scheduleId} {
+      allow create: if isAuthenticated() && request.resource.data.ownerId == request.auth.uid;
+      allow read: if isAuthenticated() && (
+        request.auth.uid == resource.data.ownerId || 
+        request.auth.uid in resource.data.adminUserIds
+      );
+      allow update: if isScheduleAdmin(scheduleId) && 
+                     request.resource.data.ownerId == resource.data.ownerId; // Cannot change owner
+      allow delete: if isScheduleOwner(scheduleId);
+      
+      // Members subcollection - Owners and admins can manage members
+      match /members/{memberId} {
+        allow read: if isAuthenticated() && (
+          isScheduleAdmin(scheduleId) || 
+          memberId == request.auth.uid
+        );
+        allow create, update: if isScheduleAdmin(scheduleId);
+        allow delete: if isScheduleAdmin(scheduleId) && 
+                      resource.data.userId != resource.parent().data.ownerId; // Cannot delete owner
+      }
+      
+      // People subcollection - Admins can manage
+      match /people/{personId} {
+        allow read, create, update, delete: if isScheduleAdmin(scheduleId);
+      }
+      
+      // Assignments subcollection - Admins can manage
+      match /assignments/{assignmentId} {
+        allow read, create, update, delete: if isScheduleAdmin(scheduleId);
+      }
+      
+      // Roles subcollection - Admins can manage
+      match /roles/{roleId} {
+        allow read, create, update, delete: if isScheduleAdmin(scheduleId);
+      }
+    }
+    
+    // Legacy rules for backward compatibility - will be removed after migration
+    match /people/{personId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    match /assignments/{assignmentId} {
+      allow read, write: if isAuthenticated();
+    }
+    
+    match /roles/{roleId} {
+      allow read, write: if isAuthenticated();
+    }
   }
 }

@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Edit, Trash2, User } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, BookmarkIcon } from 'lucide-react';
 import { useFirestore } from '@/context/firestore-context';
-import type { Person, RoleId } from '@/types';
+import type { Role } from '@/types';
 import {
   Table,
   TableBody,
@@ -21,39 +21,38 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import PersonForm from './person-form';
-import { Badge } from '@/components/ui/badge';
+import RoleForm from './role-form';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
-export default function PeopleManagementClient() {
-  const { people, deletePerson, loading, error, currentSchedule, roles } = useFirestore();
+export default function RoleManagementClient() {
+  const { roles, deleteRole, loading, error, currentSchedule } = useFirestore();
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingPerson, setEditingPerson] = useState<Person | null>(null);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
 
   const handleAddNew = () => {
-    setEditingPerson(null);
+    setEditingRole(null);
     setIsFormOpen(true);
   };
 
-  const handleEdit = (person: Person) => {
-    setEditingPerson(person);
+  const handleEdit = (role: Role) => {
+    setEditingRole(role);
     setIsFormOpen(true);
   };
 
-  const handleDelete = async (personId: string) => {
+  const handleDelete = async (roleId: string) => {
     try {
-      await deletePerson(personId);
+      await deleteRole(roleId);
       toast({
-        title: "Person Removed",
-        description: "The person has been successfully removed.",
+        title: "Role Removed",
+        description: "The role has been successfully removed.",
       });
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to remove person. Please try again.",
+        description: "Failed to remove role. Please try again.",
         variant: "destructive",
       });
     }
@@ -61,7 +60,7 @@ export default function PeopleManagementClient() {
 
   const onFormSubmitSuccess = () => {
     setIsFormOpen(false);
-    setEditingPerson(null);
+    setEditingRole(null);
   };
   
   if (!currentSchedule) {
@@ -76,7 +75,7 @@ export default function PeopleManagementClient() {
     return (
       <div className="text-center py-20">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-        <p className="text-muted-foreground">Loading people data...</p>
+        <p className="text-muted-foreground">Loading roles data...</p>
       </div>
     );
   }
@@ -93,21 +92,21 @@ export default function PeopleManagementClient() {
   return (
     <div className="space-y-8">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">People List</h2>
+        <h2 className="text-2xl font-bold">Roles List</h2>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button onClick={handleAddNew} className="gradient-bg text-white border-0 hover:opacity-90">
-              <PlusCircle className="mr-2 h-4 w-4" /> Add New Person
+              <PlusCircle className="mr-2 h-4 w-4" /> Add New Role
             </Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[525px]">
             <DialogHeader>
-              <DialogTitle>{editingPerson ? 'Edit Person' : 'Add New Person'}</DialogTitle>
+              <DialogTitle>{editingRole ? 'Edit Role' : 'Add New Role'}</DialogTitle>
               <DialogDescription>
-                {editingPerson ? 'Update the details for this person.' : 'Enter the details for the new person.'}
+                {editingRole ? 'Update the details for this role.' : 'Enter the details for the new role.'}
               </DialogDescription>
             </DialogHeader>
-            <PersonForm person={editingPerson} onSuccess={onFormSubmitSuccess} />
+            <RoleForm role={editingRole} onSuccess={onFormSubmitSuccess} />
           </DialogContent>
         </Dialog>
       </div>
@@ -118,43 +117,30 @@ export default function PeopleManagementClient() {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>Contact Info</TableHead>
-                <TableHead>Roles</TableHead>
+                <TableHead>Description</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {people.length === 0 && (
+              {roles.length === 0 && (
                 <TableRow>
-                  <TableCell colSpan={4} className="text-center py-10">
+                  <TableCell colSpan={3} className="text-center py-10">
                     <div className="flex flex-col items-center justify-center gap-2">
-                      <User className="h-10 w-10 text-muted-foreground" />
-                      <p className="text-muted-foreground">No people added yet.</p>
+                      <BookmarkIcon className="h-10 w-10 text-muted-foreground" />
+                      <p className="text-muted-foreground">No roles added yet.</p>
                       <Button onClick={handleAddNew} variant="outline" size="sm" className="mt-2">
-                        <PlusCircle className="mr-2 h-4 w-4" /> Add Person
+                        <PlusCircle className="mr-2 h-4 w-4" /> Add Role
                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
               )}
-              {people.map((person) => (
-                <TableRow key={person.id} className="hover:bg-accent/5">
-                  <TableCell className="font-medium">{person.name}</TableCell>
-                  <TableCell>{person.contactInfo || '-'}</TableCell>
-                  <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {person.fillableRoleIds && person.fillableRoleIds.length > 0 ? (
-                        person.fillableRoleIds.map(roleId => {
-                          const role = roles.find(r => r.id === roleId);
-                          return role ? <Badge key={roleId} variant="outline">{role.name}</Badge> : null;
-                        })
-                      ) : (
-                        <span className="text-xs text-muted-foreground">Any role</span>
-                      )}
-                    </div>
-                  </TableCell>
+              {roles.map((role) => (
+                <TableRow key={role.id} className="hover:bg-accent/5">
+                  <TableCell className="font-medium">{role.name}</TableCell>
+                  <TableCell>{role.description || '-'}</TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button variant="ghost" size="icon" onClick={() => handleEdit(person)}>
+                    <Button variant="ghost" size="icon" onClick={() => handleEdit(role)}>
                       <Edit className="h-4 w-4" />
                       <span className="sr-only">Edit</span>
                     </Button>
@@ -169,12 +155,13 @@ export default function PeopleManagementClient() {
                         <AlertDialogHeader>
                           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                           <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete {person.name} and remove them from any assignments.
+                            This action cannot be undone. This will permanently delete the "{role.name}" role
+                            and remove it from any assignments.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
                           <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction onClick={() => handleDelete(person.id)} className="bg-destructive hover:bg-destructive/90">
+                          <AlertDialogAction onClick={() => handleDelete(role.id)} className="bg-destructive hover:bg-destructive/90">
                             Delete
                           </AlertDialogAction>
                         </AlertDialogFooter>
@@ -189,4 +176,4 @@ export default function PeopleManagementClient() {
       </div>
     </div>
   );
-}
+} 

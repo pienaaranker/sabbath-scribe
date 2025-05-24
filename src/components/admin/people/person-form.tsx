@@ -7,123 +7,125 @@ import * as z from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from "@/components/ui/checkbox";
+import { Checkbox } from '@/components/ui/checkbox';
 import { useFirestore } from '@/context/firestore-context';
-import type { Person, RoleId } from '@/types';
-import { ROLES_CONFIG } from '@/lib/constants';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Person, RoleId } from '@/types';
 import { useToast } from '@/hooks/use-toast';
-import { DialogFooter, DialogClose } from '@/components/ui/dialog';
 
 const personSchema = z.object({
-  name: z.string().min(2, { message: "Name must be at least 2 characters." }),
+  name: z.string().min(1, { message: 'Name is required' }),
   contactInfo: z.string().optional(),
-  fillableRoleIds: z.array(z.custom<RoleId>()).optional(),
-  unavailableDates: z.array(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid date format (YYYY-MM-DD)")).optional(),
+  fillableRoleIds: z.array(z.string() as z.ZodType<RoleId>).optional(),
 });
 
-type PersonFormData = z.infer<typeof personSchema>;
+type PersonFormValues = z.infer<typeof personSchema>;
 
 interface PersonFormProps {
-  person?: Person | null;
+  person: Person | null;
   onSuccess: () => void;
 }
 
 export default function PersonForm({ person, onSuccess }: PersonFormProps) {
-  const { addPerson, updatePerson } = useFirestore();
+  const { addPerson, updatePerson, roles } = useFirestore();
   const { toast } = useToast();
-
-  const { control, register, handleSubmit, formState: { errors, isSubmitting }, setValue, watch } = useForm<PersonFormData>({
+  
+  const {
+    register,
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<PersonFormValues>({
     resolver: zodResolver(personSchema),
     defaultValues: {
       name: person?.name || '',
       contactInfo: person?.contactInfo || '',
       fillableRoleIds: person?.fillableRoleIds || [],
-      unavailableDates: person?.unavailableDates || [],
     },
   });
 
-  const selectedRoles = watch('fillableRoleIds') || [];
-
-  const onSubmit = async (data: PersonFormData) => {
+  const onSubmit = async (data: PersonFormValues) => {
     try {
       if (person) {
+        // Update existing person
         await updatePerson(person.id, data);
         toast({
-          title: "Person Updated",
-          description: `${data.name} has been successfully updated.`,
+          title: 'Person Updated',
+          description: `${data.name} has been updated successfully.`,
         });
       } else {
+        // Add new person
         await addPerson(data);
         toast({
-          title: "Person Added",
-          description: `${data.name} has been successfully added.`,
+          title: 'Person Added',
+          description: `${data.name} has been added successfully.`,
         });
       }
+      
+      reset();
       onSuccess();
     } catch (error) {
+      console.error('Error saving person:', error);
       toast({
-        title: "Error",
-        description: `Failed to ${person ? 'update' : 'add'} person. Please try again.`,
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to save person. Please try again.',
+        variant: 'destructive',
       });
-      console.error("Form submission error:", error);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      <div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="space-y-2">
         <Label htmlFor="name">Name</Label>
         <Input id="name" {...register('name')} />
-        {errors.name && <p className="text-sm text-destructive mt-1">{errors.name.message}</p>}
-      </div>
-      <div>
-        <Label htmlFor="contactInfo">Contact Info (Email/Phone)</Label>
-        <Input id="contactInfo" {...register('contactInfo')} />
-        {errors.contactInfo && <p className="text-sm text-destructive mt-1">{errors.contactInfo.message}</p>}
-      </div>
-      <div>
-        <Label>Can Fill Roles</Label>
-        <ScrollArea className="h-[150px] w-full rounded-md border p-2">
-          <div className="space-y-2">
-            {ROLES_CONFIG.map((role) => (
-              <div key={role.id} className="flex items-center space-x-2">
-                <Checkbox
-                  id={`role-${role.id}`}
-                  checked={selectedRoles.includes(role.id)}
-                  onCheckedChange={(checked) => {
-                    const currentRoles = selectedRoles;
-                    if (checked) {
-                      setValue('fillableRoleIds', [...currentRoles, role.id]);
-                    } else {
-                      setValue('fillableRoleIds', currentRoles.filter((id) => id !== role.id));
-                    }
-                  }}
-                />
-                <Label htmlFor={`role-${role.id}`} className="font-normal">{role.name}</Label>
-              </div>
-            ))}
-          </div>
-        </ScrollArea>
-        {errors.fillableRoleIds && <p className="text-sm text-destructive mt-1">{errors.fillableRoleIds.message}</p>}
+        {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
       </div>
       
-      {/* Placeholder for unavailable dates input if needed in future. For now, it's managed manually or not a primary UI feature in this form. */}
-      {/* <div>
-        <Label htmlFor="unavailableDates">Unavailable Dates (YYYY-MM-DD, comma-separated)</Label>
-        <Input id="unavailableDates" {...register('unavailableDates', { setValueAs: (value: string) => value.split(',').map(d => d.trim()).filter(d => d) })} />
-        {errors.unavailableDates && <p className="text-sm text-destructive mt-1">{errors.unavailableDates.message}</p>}
-      </div> */}
-
-      <DialogFooter>
-        <DialogClose asChild>
-          <Button type="button" variant="outline">Cancel</Button>
-        </DialogClose>
-        <Button type="submit" variant="secondary" disabled={isSubmitting}>
-          {isSubmitting ? 'Processing...' : (person ? 'Update Person' : 'Add Person')}
+      <div className="space-y-2">
+        <Label htmlFor="contactInfo">Contact Info (optional)</Label>
+        <Input id="contactInfo" {...register('contactInfo')} placeholder="Email or phone number" />
+      </div>
+      
+      <div className="space-y-3">
+        <Label>Roles this person can fill (optional)</Label>
+        <p className="text-sm text-muted-foreground mb-2">
+          Leave all unchecked if this person can fill any role.
+        </p>
+        
+        <div className="grid grid-cols-2 gap-2">
+          {roles.map((role) => (
+            <div key={role.id} className="flex items-center space-x-2">
+              <Controller
+                name="fillableRoleIds"
+                control={control}
+                render={({ field }) => (
+                  <Checkbox
+                    id={`role-${role.id}`}
+                    checked={field.value?.includes(role.id)}
+                    onCheckedChange={(checked) => {
+                      const currentValues = field.value || [];
+                      const newValues = checked
+                        ? [...currentValues, role.id]
+                        : currentValues.filter((id) => id !== role.id);
+                      field.onChange(newValues);
+                    }}
+                  />
+                )}
+              />
+              <Label htmlFor={`role-${role.id}`} className="text-sm cursor-pointer">
+                {role.name}
+              </Label>
+            </div>
+          ))}
+        </div>
+      </div>
+      
+      <div className="flex justify-end">
+        <Button type="submit" disabled={isSubmitting} className="gradient-bg text-white border-0 hover:opacity-90">
+          {isSubmitting ? 'Saving...' : person ? 'Update Person' : 'Add Person'}
         </Button>
-      </DialogFooter>
+      </div>
     </form>
   );
 }

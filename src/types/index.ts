@@ -1,4 +1,3 @@
-
 export type RoleId =
   | 'preacher'
   | 'elder_on_duty'
@@ -34,4 +33,23 @@ export interface SabbathAssignment {
   roleId: RoleId;
   roleName: string;
   person: Person | null;
+}
+
+// New types for multi-tenant structure
+export interface Schedule {
+  id: string;
+  name: string;
+  description?: string;
+  ownerId: string; // User ID of the owner
+  adminUserIds: string[]; // List of user IDs who can manage this schedule
+  createdAt: Date | string;
+  updatedAt: Date | string;
+}
+
+export interface ScheduleMember {
+  userId: string; 
+  email: string;
+  displayName?: string;
+  role: 'owner' | 'admin' | 'viewer';
+  addedAt: Date | string;
 }
