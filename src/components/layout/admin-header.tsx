@@ -31,7 +31,7 @@ export default function AdminHeader() {
   };
 
   return (
-    <header className="gradient-bg text-white shadow-lg">
+    <header className="bg-primary text-primary-foreground shadow-lg">
       <div className="container mx-auto px-4 py-3 sm:py-4">
         {/* Top row: Logo and user info */}
         <div className="flex justify-between items-center mb-3 sm:mb-4">
@@ -44,7 +44,7 @@ export default function AdminHeader() {
               className="h-6 w-6 sm:h-7 sm:w-7 object-contain"
             />
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
-              <span className="text-lg sm:text-xl font-semibold">
+              <span className="text-lg sm:text-xl font-serif font-bold">
                 <span className="hidden sm:inline">{APP_NAME} - Admin</span>
                 <span className="sm:hidden">Admin</span>
               </span>
@@ -61,7 +61,7 @@ export default function AdminHeader() {
             onClick={handleLogout}
             variant="ghost"
             size="sm"
-            className="text-white hover:bg-white/10 sm:hidden"
+            className="text-primary-foreground hover:bg-white/10 sm:hidden"
           >
             <LogOut className="h-4 w-4" />
           </Button>
@@ -78,19 +78,19 @@ export default function AdminHeader() {
         <nav className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-1 md:gap-2">
           {/* Main navigation buttons */}
           <div className="flex flex-col sm:flex-row gap-1 sm:gap-1 md:gap-2 flex-1">
-            <Button variant="ghost" asChild className="text-white hover:bg-white/10 justify-start sm:justify-center text-sm px-2 sm:px-3">
+            <Button variant="ghost" asChild className="text-primary-foreground hover:bg-white/10 justify-start sm:justify-center text-sm px-2 sm:px-3">
               <Link href="/admin/roles">
                 <BookmarkIcon className="mr-2 h-4 w-4" />
                 <span>Roles</span>
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="text-white hover:bg-white/10 justify-start sm:justify-center text-sm px-2 sm:px-3">
+            <Button variant="ghost" asChild className="text-primary-foreground hover:bg-white/10 justify-start sm:justify-center text-sm px-2 sm:px-3">
               <Link href="/admin/people">
                 <Users className="mr-2 h-4 w-4" />
                 <span>People</span>
               </Link>
             </Button>
-            <Button variant="ghost" asChild className="text-white hover:bg-white/10 justify-start sm:justify-center text-sm px-2 sm:px-3">
+            <Button variant="ghost" asChild className="text-primary-foreground hover:bg-white/10 justify-start sm:justify-center text-sm px-2 sm:px-3">
               <Link href="/admin/assignments">
                 <CalendarDays className="mr-2 h-4 w-4" />
                 <span>Assignments</span>
@@ -101,7 +101,7 @@ export default function AdminHeader() {
           {/* Separator and action buttons */}
           <div className="flex flex-col sm:flex-row gap-1 sm:gap-2 sm:items-center">
             <Separator orientation="vertical" className="h-6 mx-1 hidden sm:block bg-white/20" />
-            <Button asChild className="bg-white/20 hover:bg-white/30 backdrop-blur-md border border-white/30 text-white justify-start sm:justify-center text-sm px-2 sm:px-3">
+            <Button asChild className="bg-accent hover:bg-accent/90 text-accent-foreground justify-start sm:justify-center text-sm px-2 sm:px-3 font-medium">
               <Link href="/admin">
                 <Home className="mr-2 h-4 w-4" />
                 <span>Dashboard</span>
@@ -110,7 +110,7 @@ export default function AdminHeader() {
             <Button
               onClick={handleLogout}
               variant="ghost"
-              className="text-white hover:bg-white/10 justify-start sm:justify-center text-sm px-2 sm:px-3 hidden sm:flex"
+              className="text-primary-foreground hover:bg-white/10 justify-start sm:justify-center text-sm px-2 sm:px-3 hidden sm:flex"
             >
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
