@@ -17,7 +17,7 @@ export default function AppShell({ children }: AppShellProps) {
     if (isHomepage) {
       // Add smooth scrolling animation for cards
       const cards = document.querySelectorAll('.feature-card');
-      
+
       const observer = new IntersectionObserver((entries) => {
         entries.forEach((entry, index) => {
           if (entry.isIntersecting) {
@@ -46,7 +46,7 @@ export default function AppShell({ children }: AppShellProps) {
           element.style.top = Math.random() * 100 + '%';
           element.style.animationDelay = Math.random() * 2 + 's';
           hero.querySelector('.floating-elements')?.appendChild(element);
-          
+
           setTimeout(() => element.remove(), 6000);
         }, 3000);
 
@@ -63,7 +63,7 @@ export default function AppShell({ children }: AppShellProps) {
   return (
     <div className="min-h-screen flex flex-col">
       {isAdminRoute ? <AdminHeader /> : <Header />}
-      
+
       {isHomepage && (
         <div className="hero gradient-bg">
           <div className="floating-elements">
@@ -78,15 +78,15 @@ export default function AppShell({ children }: AppShellProps) {
           </div>
         </div>
       )}
-      
+
       <main className={isHomepage ? 'main-content' : 'flex-grow bg-white'}>
-        <div className={isHomepage ? '' : 'container mx-auto px-4 py-8'}>
+        <div className={isHomepage ? '' : 'container mx-auto px-4 py-6 sm:py-8'}>
           {children}
         </div>
       </main>
-      
+
       {!isHomepage && (
-        <footer className="py-6 text-center text-sm text-muted-foreground bg-white">
+        <footer className="py-4 sm:py-6 text-center text-xs sm:text-sm text-muted-foreground bg-white">
           © {new Date().getFullYear()} SabbathScribe. All rights reserved.
         </footer>
       )}

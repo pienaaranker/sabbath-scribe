@@ -74,7 +74,7 @@ export default function AssignmentManagementClient() {
       });
     }
   };
-  
+
   useEffect(() => {
     if (typeof window !== "undefined" && window.location.hash === "#suggest") {
       window.history.replaceState(null, '', window.location.pathname + window.location.search);
@@ -115,19 +115,66 @@ export default function AssignmentManagementClient() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row gap-8">
+    <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 px-4">
       {/* Left: Assignments Table */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg p-6">
-        <h2 className="section-title mb-6">Assignments for {formatDateForDisplay(selectedDate)}</h2>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Role</TableHead>
-              <TableHead>Assignee</TableHead>
-              <TableHead className="w-[100px]">Status</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
+      <div className="flex-1 bg-white rounded-xl shadow-lg p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center lg:text-left">
+          Assignments for {formatDateForDisplay(selectedDate)}
+        </h2>
+
+        {/* Mobile Card View */}
+        <div className="block sm:hidden space-y-4">
+          {roles.map((role) => {
+            const assignedPerson = sabbathAssignmentsMap.get(role.id as RoleId);
+            const isUnassigned = !assignedPerson;
+            const assignablePeople = people.filter(p =>
+              !p.fillableRoleIds || p.fillableRoleIds.length === 0 || p.fillableRoleIds.includes(role.id)
+            );
+
+            return (
+              <div key={role.id} className="border rounded-lg p-4 space-y-3">
+                <div className="flex justify-between items-start">
+                  <h3 className="font-semibold text-lg">{role.name}</h3>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                    isUnassigned
+                      ? 'bg-red-100 text-red-800'
+                      : 'bg-green-100 text-green-800'
+                  }`}>
+                    {isUnassigned ? 'Unassigned' : 'Assigned'}
+                  </span>
+                </div>
+                <Select
+                  value={assignedPerson?.id || ''}
+                  onValueChange={(value) => handleAssignmentChange(role.id as RoleId, value || null)}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select person..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Unassigned</SelectItem>
+                    {assignablePeople.map((person) => (
+                      <SelectItem key={person.id} value={person.id}>
+                        {person.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Desktop Table View */}
+        <div className="hidden sm:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Role</TableHead>
+                <TableHead>Assignee</TableHead>
+                <TableHead className="w-[100px]">Status</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
             {roles.map((role) => {
               const assignedPerson = sabbathAssignmentsMap.get(role.id as RoleId);
               const isUnassigned = !assignedPerson;
@@ -167,20 +214,25 @@ export default function AssignmentManagementClient() {
                 </TableRow>
               );
             })}
-          </TableBody>
-        </Table>
+            </TableBody>
+          </Table>
+        </div>
       </div>
+
       {/* Right: Calendar */}
-      <div className="w-full md:w-80 flex-shrink-0">
-        <div className="bg-white rounded-xl shadow-lg p-6 sticky top-8">
-          <h2 className="section-title mb-4">Select Sabbath</h2>
-          <Calendar
-            mode="single"
-            selected={selectedDate}
-            onSelect={handleDateChange}
-            initialFocus
-            disabled={(date) => date.getDay() !== 6}
-          />
+      <div className="w-full lg:w-80 flex-shrink-0">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:sticky lg:top-8">
+          <h2 className="text-lg sm:text-xl font-bold mb-4 text-center lg:text-left">Select Sabbath</h2>
+          <div className="flex justify-center">
+            <Calendar
+              mode="single"
+              selected={selectedDate}
+              onSelect={handleDateChange}
+              initialFocus
+              disabled={(date) => date.getDay() !== 6}
+              className="rounded-md border"
+            />
+          </div>
         </div>
       </div>
     </div>

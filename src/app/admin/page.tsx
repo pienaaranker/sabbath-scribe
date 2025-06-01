@@ -47,21 +47,21 @@ export default function AdminDashboardPage() {
       });
       return;
     }
-    
+
     try {
       setIsCreating(true);
-      
+
       await addSchedule({
         name: newScheduleName.trim(),
         description: newScheduleDescription.trim() || undefined,
         adminUserIds: [],
       });
-      
+
       toast({
         title: "Schedule Created",
         description: "Your new schedule has been created successfully.",
       });
-      
+
       setNewScheduleName('');
       setNewScheduleDescription('');
       setIsDialogOpen(false);
@@ -80,20 +80,20 @@ export default function AdminDashboardPage() {
   // Show a welcome screen if user has no schedules
   if (schedules.length === 0) {
     return (
-      <div className="container max-w-4xl py-12">
+      <div className="container max-w-4xl py-8 sm:py-12 px-4">
         <Card className="border-2 border-dashed">
-          <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Welcome to SabbathScribe</CardTitle>
-            <CardDescription>
+          <CardHeader className="text-center px-4 sm:px-6">
+            <CardTitle className="text-xl sm:text-2xl">Welcome to SabbathScribe</CardTitle>
+            <CardDescription className="text-sm sm:text-base">
               Get started by creating your first schedule
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col items-center pb-6">
-            <div className="rounded-full bg-primary/10 p-6 mb-6">
-              <Calendar className="h-12 w-12 text-primary" />
+          <CardContent className="flex flex-col items-center pb-6 px-4 sm:px-6">
+            <div className="rounded-full bg-primary/10 p-4 sm:p-6 mb-4 sm:mb-6">
+              <Calendar className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
             </div>
-            <p className="text-center text-muted-foreground mb-6 max-w-md">
-              A schedule is where you'll manage your church's Sabbath assignments. 
+            <p className="text-center text-muted-foreground mb-4 sm:mb-6 max-w-md text-sm sm:text-base">
+              A schedule is where you'll manage your church's Sabbath assignments.
               You can create multiple schedules for different purposes or congregations.
             </p>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -149,15 +149,15 @@ export default function AdminDashboardPage() {
 
   // Default view for users with schedules
   return (
-    <div className="container">
+    <div className="container px-4">
       <section className="section">
-        <h2 className="section-title">Admin Dashboard</h2>
-        <p className="text-center text-muted-foreground mb-12 text-lg">
+        <h2 className="section-title text-xl sm:text-2xl md:text-3xl">Admin Dashboard</h2>
+        <p className="text-center text-muted-foreground mb-8 sm:mb-12 text-base sm:text-lg px-4">
           {currentSchedule ? `Managing "${currentSchedule.name}"` : 'Select a schedule to manage'}
         </p>
-        
+
         {currentSchedule ? (
-          <div className="features-grid">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <DashboardActionCard
               title="Manage Roles"
               description="Create and customize roles that people can be assigned to."
@@ -187,8 +187,8 @@ export default function AdminDashboardPage() {
             />
           </div>
         ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">Please select a schedule from the dropdown above to continue.</p>
+          <div className="text-center py-8 sm:py-12 px-4">
+            <p className="text-muted-foreground mb-4 text-sm sm:text-base">Please select a schedule from the dropdown above to continue.</p>
           </div>
         )}
       </section>
@@ -209,15 +209,15 @@ interface DashboardActionCardProps {
 function DashboardActionCard({ title, description, link, actionText, imageSrc, imageAlt, dataAiHint }: DashboardActionCardProps) {
   return (
     <div className="feature-card overflow-hidden flex flex-col h-full">
-      <div className="relative w-full h-40">
-        <Image src={imageSrc} alt={imageAlt} layout="fill" objectFit="cover" data-ai-hint={dataAiHint} />
+      <div className="relative w-full h-32 sm:h-40">
+        <Image src={imageSrc} alt={imageAlt} fill style={{ objectFit: 'cover' }} data-ai-hint={dataAiHint} />
       </div>
-      <div className="p-6 flex-grow">
-        <h3 className="text-xl font-semibold mb-2">{title}</h3>
-        <p className="text-muted-foreground mb-6">{description}</p>
+      <div className="p-4 sm:p-6 flex-grow">
+        <h3 className="text-lg sm:text-xl font-semibold mb-2">{title}</h3>
+        <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base">{description}</p>
       </div>
-      <div className="px-6 pb-6">
-        <Button asChild className="w-full gradient-bg text-white border-0 hover:opacity-90">
+      <div className="px-4 sm:px-6 pb-4 sm:pb-6">
+        <Button asChild className="w-full gradient-bg text-white border-0 hover:opacity-90 h-10 sm:h-11">
           <Link href={link}>{actionText}</Link>
         </Button>
       </div>

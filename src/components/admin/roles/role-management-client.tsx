@@ -62,7 +62,7 @@ export default function RoleManagementClient() {
     setIsFormOpen(false);
     setEditingRole(null);
   };
-  
+
   if (!currentSchedule) {
     return (
       <div className="text-center py-20">
@@ -70,7 +70,7 @@ export default function RoleManagementClient() {
       </div>
     );
   }
-  
+
   if (loading) {
     return (
       <div className="text-center py-20">
@@ -90,19 +90,19 @@ export default function RoleManagementClient() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Roles List</h2>
+    <div className="space-y-6 sm:space-y-8 px-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <h2 className="text-xl sm:text-2xl font-bold">Roles List</h2>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
-            <Button onClick={handleAddNew} className="gradient-bg text-white border-0 hover:opacity-90">
+            <Button onClick={handleAddNew} className="gradient-bg text-white border-0 hover:opacity-90 w-full sm:w-auto">
               <PlusCircle className="mr-2 h-4 w-4" /> Add New Role
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-[525px]">
+          <DialogContent className="sm:max-w-[525px] mx-4 sm:mx-0">
             <DialogHeader>
-              <DialogTitle>{editingRole ? 'Edit Role' : 'Add New Role'}</DialogTitle>
-              <DialogDescription>
+              <DialogTitle className="text-lg sm:text-xl">{editingRole ? 'Edit Role' : 'Add New Role'}</DialogTitle>
+              <DialogDescription className="text-sm sm:text-base">
                 {editingRole ? 'Update the details for this role.' : 'Enter the details for the new role.'}
               </DialogDescription>
             </DialogHeader>
@@ -176,4 +176,4 @@ export default function RoleManagementClient() {
       </div>
     </div>
   );
-} 
+}

@@ -28,7 +28,7 @@ interface PersonFormProps {
 export default function PersonForm({ person, onSuccess }: PersonFormProps) {
   const { addPerson, updatePerson, roles } = useFirestore();
   const { toast } = useToast();
-  
+
   const {
     register,
     control,
@@ -61,7 +61,7 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
           description: `${data.name} has been added successfully.`,
         });
       }
-      
+
       reset();
       onSuccess();
     } catch (error) {
@@ -81,12 +81,12 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
         <Input id="name" {...register('name')} />
         {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
       </div>
-      
+
       <div className="space-y-2">
         <Label htmlFor="contactInfo">Contact Info (optional)</Label>
         <Input id="contactInfo" {...register('contactInfo')} placeholder="Email or phone number" />
       </div>
-      
+
       <div className="space-y-3">
         <Label>Roles this person can fill (optional)</Label>
         <p className="text-sm text-muted-foreground mb-2">
@@ -101,7 +101,7 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
             {roles.map((role) => (
               <div key={role.id} className="flex items-center space-x-2">
                 <Controller
@@ -129,7 +129,7 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
           </div>
         )}
       </div>
-      
+
       <div className="flex justify-end">
         <Button type="submit" disabled={isSubmitting} className="gradient-bg text-white border-0 hover:opacity-90">
           {isSubmitting ? 'Saving...' : person ? 'Update Person' : 'Add Person'}

@@ -18,7 +18,7 @@ export default function AuthPage() {
   const [password, setPassword] = useState('');
   const [displayName, setDisplayName] = useState('');
   const [loading, setLoading] = useState(false);
-  
+
   const { signIn, signUp, signInWithGoogle, user } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
@@ -60,7 +60,7 @@ export default function AuthPage() {
 
   const handleGoogleAuth = async () => {
     setLoading(true);
-    
+
     try {
       await signInWithGoogle();
       toast({
@@ -79,29 +79,30 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="w-full max-w-md p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-primary text-2xl font-bold hover:opacity-90 transition-opacity">
-            <CalendarCheck className="h-8 w-8 text-primary" />
-            SabbathScribe
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+      <div className="w-full max-w-md p-4 sm:p-6 bg-white rounded-2xl shadow-xl border border-gray-100">
+        <div className="text-center mb-6 sm:mb-8">
+          <Link href="/" className="inline-flex items-center gap-2 text-primary text-xl sm:text-2xl font-bold hover:opacity-90 transition-opacity">
+            <CalendarCheck className="h-6 w-6 sm:h-8 sm:w-8 text-primary" />
+            <span className="hidden xs:inline">SabbathScribe</span>
+            <span className="xs:hidden">SS</span>
           </Link>
-          <p className="text-gray-500 mt-2 text-base">Church Roster Management</p>
+          <p className="text-gray-500 mt-2 text-sm sm:text-base">Church Roster Management</p>
         </div>
 
         <Card className="shadow-none border-0 bg-transparent">
-          <CardHeader className="text-center pb-4">
-            <CardTitle className="text-2xl text-gray-900">
+          <CardHeader className="text-center pb-3 sm:pb-4">
+            <CardTitle className="text-xl sm:text-2xl text-gray-900">
               {isSignUp ? 'Create Account' : 'Sign In'}
             </CardTitle>
-            <CardDescription className="text-gray-500">
-              {isSignUp 
-                ? 'Join SabbathScribe to manage your church roster' 
+            <CardDescription className="text-gray-500 text-sm sm:text-base">
+              {isSignUp
+                ? 'Join SabbathScribe to manage your church roster'
                 : 'Welcome back! Please sign in to continue'}
             </CardDescription>
           </CardHeader>
-          
-          <CardContent className="space-y-6">
+
+          <CardContent className="space-y-4 sm:space-y-6">
             <form onSubmit={handleEmailAuth} className="space-y-4">
               {isSignUp && (
                 <div className="space-y-2">
@@ -120,7 +121,7 @@ export default function AuthPage() {
                   />
                 </div>
               )}
-              
+
               <div className="space-y-2">
                 <Label htmlFor="email" className="flex items-center gap-2">
                   <Mail className="h-4 w-4 text-primary" />
@@ -136,7 +137,7 @@ export default function AuthPage() {
                   disabled={loading}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="password" className="flex items-center gap-2">
                   <Lock className="h-4 w-4 text-primary" />
@@ -153,10 +154,10 @@ export default function AuthPage() {
                   minLength={6}
                 />
               </div>
-              
-              <Button 
-                type="submit" 
-                className="w-full bg-primary text-white border-0 hover:bg-primary/90"
+
+              <Button
+                type="submit"
+                className="w-full bg-primary text-white border-0 hover:bg-primary/90 h-10 sm:h-11"
                 disabled={loading}
               >
                 {loading ? 'Processing...' : (isSignUp ? 'Create Account' : 'Sign In')}
@@ -174,14 +175,14 @@ export default function AuthPage() {
               </div>
             </div>
 
-            <Button 
+            <Button
               onClick={handleGoogleAuth}
-              variant="outline" 
-              className="w-full border-gray-200"
+              variant="outline"
+              className="w-full border-gray-200 h-10 sm:h-11"
               disabled={loading}
             >
               <Chrome className="mr-2 h-4 w-4 text-primary" />
-              Sign in with Google
+              <span className="text-sm sm:text-base">Sign in with Google</span>
             </Button>
 
             <div className="text-center">
@@ -189,20 +190,20 @@ export default function AuthPage() {
                 variant="link"
                 onClick={() => setIsSignUp(!isSignUp)}
                 disabled={loading}
-                className="text-sm text-primary"
+                className="text-xs sm:text-sm text-primary p-2"
               >
-                {isSignUp 
-                  ? 'Already have an account? Sign in' 
+                {isSignUp
+                  ? 'Already have an account? Sign in'
                   : "Don't have an account? Sign up"}
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <div className="text-center mt-6">
-          <Link 
-            href="/" 
-            className="text-gray-400 hover:text-primary transition-colors text-sm"
+        <div className="text-center mt-4 sm:mt-6">
+          <Link
+            href="/"
+            className="text-gray-400 hover:text-primary transition-colors text-xs sm:text-sm"
           >
             ← Back to main site
           </Link>
