@@ -2,13 +2,14 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+
 import { useFirestore } from '@/context/firestore-context';
-import type { Person, RoleId, Assignment, SabbathAssignment } from '@/types';
-import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb, getNearestServiceDay, getNextServiceDay, getPreviousServiceDay, getServiceDayName } from '@/lib/date-utils';
-import { ChevronLeft, ChevronRight, CalendarIcon, Users } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import type { Person, RoleId } from '@/types';
+import { formatDateForDb, formatDateForDisplay, getNearestServiceDay, getServiceDayName } from '@/lib/date-utils';
+import { Star } from 'lucide-react';
+
 import { ServiceCalendar } from "@/components/ui/service-calendar";
+import HolidaySelector from "./holiday-selector";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -230,7 +231,7 @@ export default function AssignmentManagementClient() {
       </div>
 
       {/* Right: Calendar */}
-      <div className="w-full lg:w-80 flex-shrink-0">
+      <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:sticky lg:top-8">
           <h2 className="text-lg sm:text-xl font-bold mb-4 text-center lg:text-left">
             Select {getServiceDayName(serviceDayConfig.primaryDay)}
@@ -246,6 +247,28 @@ export default function AssignmentManagementClient() {
             />
           </div>
         </div>
+
+        {/* Holiday Selector - Only show if custom dates are allowed */}
+        {serviceDayConfig.allowCustomDates && (
+          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
+            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
+              <Star className="h-5 w-5 text-amber-500" />
+              Holiday Services
+            </h3>
+            <HolidaySelector
+              onSelectDate={(date, holidayName) => {
+                setSelectedDate(date);
+                if (holidayName) {
+                  toast({
+                    title: "Holiday Selected",
+                    description: `Selected ${holidayName} on ${formatDateForDisplay(date)}`,
+                  });
+                }
+              }}
+              currentYear={selectedDate.getFullYear()}
+            />
+          </div>
+        )}
       </div>
     </div>
   );

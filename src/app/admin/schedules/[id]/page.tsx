@@ -50,6 +50,7 @@ import { UserPlus, Trash2, Mail, ExternalLink, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import ServiceDayConfigComponent from '@/components/admin/schedules/service-day-config';
+import AdvancedScheduleSettings from '@/components/admin/schedules/advanced-schedule-settings';
 import { getServiceDayName } from '@/lib/date-utils';
 
 export default function ScheduleDetailPage() {
@@ -249,7 +250,8 @@ export default function ScheduleDetailPage() {
       <Tabs defaultValue="members">
         <TabsList className="mb-4">
           <TabsTrigger value="members">Members</TabsTrigger>
-          <TabsTrigger value="settings">Settings</TabsTrigger>
+          <TabsTrigger value="settings">Basic Settings</TabsTrigger>
+          <TabsTrigger value="advanced">Advanced Settings</TabsTrigger>
         </TabsList>
         
         <TabsContent value="members" className="space-y-4">
@@ -476,6 +478,20 @@ export default function ScheduleDetailPage() {
               )}
             </CardFooter>
           </Card>
+        </TabsContent>
+
+        <TabsContent value="advanced" className="space-y-4">
+          <AdvancedScheduleSettings
+            schedule={schedule}
+            onSave={async (updates) => {
+              await updateSchedule(schedule.id, updates);
+              // Update local state
+              if (updates.name) setName(updates.name);
+              if (updates.description !== undefined) setDescription(updates.description || '');
+              if (updates.serviceDayConfig) setServiceDayConfig(updates.serviceDayConfig);
+            }}
+            isOwner={isOwner}
+          />
         </TabsContent>
       </Tabs>
     </div>

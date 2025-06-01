@@ -31,6 +31,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import ServiceDayConfigComponent from '@/components/admin/schedules/service-day-config';
+import ChurchTypeSelector from '@/components/admin/schedules/church-type-selector';
 
 export default function ScheduleSelector() {
   const { 
@@ -49,6 +50,7 @@ export default function ScheduleSelector() {
     additionalDays: [],
     allowCustomDates: false
   });
+  const [currentStep, setCurrentStep] = useState<'church-type' | 'details' | 'service-config'>('church-type');
   const [isCreating, setIsCreating] = useState(false);
 
   if (!user) {
@@ -94,6 +96,7 @@ export default function ScheduleSelector() {
         additionalDays: [],
         allowCustomDates: false
       });
+      setCurrentStep('church-type');
       setIsCreateDialogOpen(false);
     } catch (error) {
       console.error('Error creating schedule:', error);
@@ -132,47 +135,94 @@ export default function ScheduleSelector() {
             <PlusCircle className="h-4 w-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Schedule</DialogTitle>
+            <DialogTitle>
+              Create New Schedule
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                Step {currentStep === 'church-type' ? '1' : currentStep === 'details' ? '2' : '3'} of 3
+              </span>
+            </DialogTitle>
             <DialogDescription>
-              Create a new schedule to manage assignments and people.
+              {currentStep === 'church-type' && "Choose your church type to get started with the right service day configuration."}
+              {currentStep === 'details' && "Enter your schedule details."}
+              {currentStep === 'service-config' && "Review and customize your service day configuration."}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-6 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="schedule-name">Schedule Name</Label>
-              <Input
-                id="schedule-name"
-                placeholder="Weekly Service Schedule"
-                value={newScheduleName}
-                onChange={(e) => setNewScheduleName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="schedule-description">Description (Optional)</Label>
-              <Textarea
-                id="schedule-description"
-                placeholder="Schedule for our weekly services"
-                value={newScheduleDescription}
-                onChange={(e) => setNewScheduleDescription(e.target.value)}
-              />
-            </div>
 
-            {/* Service Day Configuration */}
-            <ServiceDayConfigComponent
-              config={serviceDayConfig}
-              onChange={setServiceDayConfig}
-            />
-            <div className="flex justify-end">
-              <Button 
-                onClick={handleCreateSchedule} 
-                disabled={!newScheduleName.trim() || isCreating}
-                className="gradient-bg text-white border-0 hover:opacity-90"
-              >
-                {isCreating ? 'Creating...' : 'Create Schedule'}
-              </Button>
-            </div>
+          <div className="py-4">
+            {currentStep === 'church-type' && (
+              <ChurchTypeSelector
+                onSelect={(config) => {
+                  setServiceDayConfig(config);
+                  setCurrentStep('details');
+                }}
+                selectedConfig={serviceDayConfig}
+              />
+            )}
+
+            {currentStep === 'details' && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-name">Schedule Name</Label>
+                  <Input
+                    id="schedule-name"
+                    placeholder="Weekly Service Schedule"
+                    value={newScheduleName}
+                    onChange={(e) => setNewScheduleName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-description">Description (Optional)</Label>
+                  <Textarea
+                    id="schedule-description"
+                    placeholder="Schedule for our weekly services"
+                    value={newScheduleDescription}
+                    onChange={(e) => setNewScheduleDescription(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep('church-type')}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() => setCurrentStep('service-config')}
+                    disabled={!newScheduleName.trim()}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 'service-config' && (
+              <div className="space-y-6">
+                <ServiceDayConfigComponent
+                  config={serviceDayConfig}
+                  onChange={setServiceDayConfig}
+                />
+
+                <div className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep('details')}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleCreateSchedule}
+                    disabled={!newScheduleName.trim() || isCreating}
+                    className="gradient-bg text-white border-0 hover:opacity-90"
+                  >
+                    {isCreating ? 'Creating...' : 'Create Schedule'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
