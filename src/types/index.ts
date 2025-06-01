@@ -44,6 +44,14 @@ export interface ServiceDayConfig {
   allowCustomDates?: boolean; // Allow scheduling on any date (for holidays, special events)
 }
 
+// Privacy and sharing configuration
+export interface PrivacySettings {
+  isPublic: boolean; // Allow anyone with the link to view the schedule
+  allowGuestViewing: boolean; // Allow non-members to view assignments
+  requireApproval: boolean; // Require approval for new member requests
+  publicViewingEnabled: boolean; // Enable public viewing page
+}
+
 // New types for multi-tenant structure
 export interface Schedule {
   id: string;
@@ -52,6 +60,7 @@ export interface Schedule {
   ownerId: string; // User ID of the owner
   adminUserIds: string[]; // List of user IDs who can manage this schedule
   serviceDayConfig: ServiceDayConfig; // Service day configuration
+  privacySettings?: PrivacySettings; // Privacy and sharing settings
   createdAt: Date | string;
   updatedAt: Date | string;
 }

@@ -6,16 +6,42 @@ service cloud.firestore {
     function isAuthenticated() {
       return request.auth != null;
     }
-    
+
     function isScheduleOwner(scheduleId) {
-      return isAuthenticated() && 
+      return isAuthenticated() &&
         get(/databases/$(database)/documents/schedules/$(scheduleId)).data.ownerId == request.auth.uid;
     }
-    
+
     function isScheduleAdmin(scheduleId) {
-      return isAuthenticated() && 
-        (isScheduleOwner(scheduleId) || 
+      return isAuthenticated() &&
+        (isScheduleOwner(scheduleId) ||
          request.auth.uid in get(/databases/$(database)/documents/schedules/$(scheduleId)).data.adminUserIds);
+    }
+
+    // Helper functions for privacy settings
+    function getScheduleData(scheduleId) {
+      return get(/databases/$(database)/documents/schedules/$(scheduleId)).data;
+    }
+
+    function isSchedulePublic(scheduleId) {
+      let scheduleData = getScheduleData(scheduleId);
+      // Handle backward compatibility - if no privacySettings, default to private
+      return scheduleData.keys().hasAll(['privacySettings']) &&
+             scheduleData.privacySettings.keys().hasAll(['isPublic']) &&
+             scheduleData.privacySettings.isPublic == true;
+    }
+
+    function allowsGuestViewing(scheduleId) {
+      let scheduleData = getScheduleData(scheduleId);
+      // Handle backward compatibility - if no privacySettings, default to no guest viewing
+      return scheduleData.keys().hasAll(['privacySettings']) &&
+             scheduleData.privacySettings.keys().hasAll(['allowGuestViewing']) &&
+             scheduleData.privacySettings.allowGuestViewing == true;
+    }
+
+    function canReadScheduleData(scheduleId) {
+      // Allow if user is admin, or if schedule is public, or if guest viewing is enabled
+      return isScheduleAdmin(scheduleId) || isSchedulePublic(scheduleId) || allowsGuestViewing(scheduleId);
     }
     
     // Base access for all authenticated users
@@ -25,50 +51,54 @@ service cloud.firestore {
     
     // Schedules collection - User can create, read, update, and delete schedules they own or are admin of
     match /schedules/{scheduleId} {
-      // Allow public read for schedule sharing
-      allow read: if true;
+      // Allow read based on privacy settings - admins, public schedules, or guest viewing enabled
+      allow read: if canReadScheduleData(scheduleId);
+
       // Allow create if the authenticated user is the owner and required fields are present
       allow create: if isAuthenticated() &&
         request.resource.data.ownerId == request.auth.uid;
-      
+
       // Allow update if the user is admin and ownerId is not changed
+      // Privacy settings can only be modified by the owner
       allow update: if isScheduleAdmin(scheduleId) &&
-        request.resource.data.ownerId == resource.data.ownerId;
-      
+        request.resource.data.ownerId == resource.data.ownerId &&
+        (isScheduleOwner(scheduleId) ||
+         !request.resource.data.diff(resource.data).affectedKeys().hasAny(['privacySettings']));
+
       // Allow delete if the user is the owner
       allow delete: if isScheduleOwner(scheduleId);
       
       // Members subcollection - Owners and admins can manage members
       match /members/{memberId} {
-        // Allow public read for schedule sharing
-        allow read: if true;
+        // Allow read based on privacy settings - admins, public schedules, or guest viewing enabled
+        allow read: if canReadScheduleData(scheduleId);
         allow create, update: if isScheduleAdmin(scheduleId) || (
           isAuthenticated() &&
           request.auth.uid == memberId &&
           get(/databases/$(database)/documents/schedules/$(scheduleId)).data.ownerId == request.auth.uid
         );
-        allow delete: if isScheduleAdmin(scheduleId) && 
+        allow delete: if isScheduleAdmin(scheduleId) &&
           get(/databases/$(database)/documents/schedules/$(scheduleId)).data.ownerId != resource.data.userId; // Cannot delete owner
       }
-      
+
       // People subcollection - Admins can manage
       match /people/{personId} {
-        // Allow public read for schedule sharing
-        allow read: if true;
+        // Allow read based on privacy settings - admins, public schedules, or guest viewing enabled
+        allow read: if canReadScheduleData(scheduleId);
         allow create, update, delete: if isScheduleAdmin(scheduleId);
       }
-      
+
       // Assignments subcollection - Admins can manage
       match /assignments/{assignmentId} {
-        // Allow public read for schedule sharing
-        allow read: if true;
+        // Allow read based on privacy settings - admins, public schedules, or guest viewing enabled
+        allow read: if canReadScheduleData(scheduleId);
         allow create, update, delete: if isScheduleAdmin(scheduleId);
       }
-      
+
       // Roles subcollection - Admins can manage
       match /roles/{roleId} {
-        // Allow public read for schedule sharing
-        allow read: if true;
+        // Allow read based on privacy settings - admins, public schedules, or guest viewing enabled
+        allow read: if canReadScheduleData(scheduleId);
         allow create, update, delete: if isScheduleAdmin(scheduleId);
       }
     }

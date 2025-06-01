@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
-import { Settings, Save, AlertTriangle, Info, Calendar, Users, Clock } from 'lucide-react';
-import type { Schedule, ServiceDayConfig } from '@/types';
+import { Settings, Save, AlertTriangle, Info, Calendar, Users, Clock, Copy } from 'lucide-react';
+import type { Schedule, ServiceDayConfig, PrivacySettings } from '@/types';
 import ServiceDayConfigComponent from './service-day-config';
 import { getServiceDayName } from '@/lib/date-utils';
 
@@ -32,10 +32,39 @@ export default function AdvancedScheduleSettings({ schedule, onSave, isOwner }: 
       allowCustomDates: false
     }
   );
-  const [isPublic, setIsPublic] = useState(true); // Future feature
-  const [allowGuestViewing, setAllowGuestViewing] = useState(true); // Future feature
+  const [privacySettings, setPrivacySettings] = useState<PrivacySettings>(
+    schedule.privacySettings || {
+      isPublic: false,
+      allowGuestViewing: false,
+      requireApproval: true,
+      publicViewingEnabled: false
+    }
+  );
   const [isSaving, setIsSaving] = useState(false);
   const { toast } = useToast();
+
+  const getPublicUrl = () => {
+    if (typeof window !== 'undefined') {
+      return `${window.location.origin}/schedule/${schedule.id}`;
+    }
+    return `[domain]/schedule/${schedule.id}`;
+  };
+
+  const copyPublicUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(getPublicUrl());
+      toast({
+        title: "Link Copied",
+        description: "Public schedule link has been copied to clipboard.",
+      });
+    } catch (error) {
+      toast({
+        title: "Copy Failed",
+        description: "Failed to copy link. Please copy it manually.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleSave = async () => {
     if (!name.trim()) {
@@ -54,6 +83,7 @@ export default function AdvancedScheduleSettings({ schedule, onSave, isOwner }: 
         name: name.trim(),
         description: description.trim() || undefined,
         serviceDayConfig,
+        privacySettings,
       });
 
       toast({
@@ -73,10 +103,18 @@ export default function AdvancedScheduleSettings({ schedule, onSave, isOwner }: 
   };
 
   const hasChanges = () => {
+    const currentPrivacySettings = schedule.privacySettings || {
+      isPublic: false,
+      allowGuestViewing: false,
+      requireApproval: true,
+      publicViewingEnabled: false
+    };
+
     return (
       name !== schedule.name ||
       description !== (schedule.description || '') ||
-      JSON.stringify(serviceDayConfig) !== JSON.stringify(schedule.serviceDayConfig)
+      JSON.stringify(serviceDayConfig) !== JSON.stringify(schedule.serviceDayConfig) ||
+      JSON.stringify(privacySettings) !== JSON.stringify(currentPrivacySettings)
     );
   };
 
@@ -193,19 +231,18 @@ export default function AdvancedScheduleSettings({ schedule, onSave, isOwner }: 
         </CardContent>
       </Card>
 
-      {/* Future Features (Placeholder) */}
-      <Card className="opacity-60">
+      {/* Privacy & Sharing */}
+      <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="h-5 w-5" />
             Privacy & Sharing
-            <Badge variant="secondary" className="text-xs">Coming Soon</Badge>
           </CardTitle>
           <CardDescription>
             Control who can view and access your schedule.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-6">
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Public Schedule</Label>
@@ -213,17 +250,95 @@ export default function AdvancedScheduleSettings({ schedule, onSave, isOwner }: 
                 Allow anyone with the link to view your schedule
               </div>
             </div>
-            <Switch checked={isPublic} onCheckedChange={setIsPublic} disabled />
+            <Switch
+              checked={privacySettings.isPublic}
+              onCheckedChange={(checked) =>
+                setPrivacySettings(prev => ({ ...prev, isPublic: checked }))
+              }
+              disabled={!isOwner}
+            />
           </div>
+
           <div className="flex items-center justify-between">
             <div className="space-y-0.5">
               <Label>Guest Viewing</Label>
               <div className="text-sm text-muted-foreground">
-                Allow non-members to view assignments
+                Allow non-members to view assignments without signing in
               </div>
             </div>
-            <Switch checked={allowGuestViewing} onCheckedChange={setAllowGuestViewing} disabled />
+            <Switch
+              checked={privacySettings.allowGuestViewing}
+              onCheckedChange={(checked) =>
+                setPrivacySettings(prev => ({ ...prev, allowGuestViewing: checked }))
+              }
+              disabled={!isOwner}
+            />
           </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Require Approval</Label>
+              <div className="text-sm text-muted-foreground">
+                New member requests require owner/admin approval
+              </div>
+            </div>
+            <Switch
+              checked={privacySettings.requireApproval}
+              onCheckedChange={(checked) =>
+                setPrivacySettings(prev => ({ ...prev, requireApproval: checked }))
+              }
+              disabled={!isOwner}
+            />
+          </div>
+
+          <div className="flex items-center justify-between">
+            <div className="space-y-0.5">
+              <Label>Public Viewing Page</Label>
+              <div className="text-sm text-muted-foreground">
+                Enable a dedicated public page for viewing the schedule
+              </div>
+            </div>
+            <Switch
+              checked={privacySettings.publicViewingEnabled}
+              onCheckedChange={(checked) =>
+                setPrivacySettings(prev => ({ ...prev, publicViewingEnabled: checked }))
+              }
+              disabled={!isOwner}
+            />
+          </div>
+
+          {!isOwner && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription>
+                Only the schedule owner can modify privacy and sharing settings.
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {privacySettings.isPublic && (
+            <Alert>
+              <Info className="h-4 w-4" />
+              <AlertDescription className="space-y-3">
+                <div>
+                  <strong>Public Schedule:</strong> Anyone with the link can view this schedule.
+                </div>
+                <div className="flex items-center gap-2">
+                  <code className="text-xs bg-muted px-2 py-1 rounded flex-1 break-all">
+                    {getPublicUrl()}
+                  </code>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={copyPublicUrl}
+                    className="h-7 px-2"
+                  >
+                    <Copy className="h-3 w-3" />
+                  </Button>
+                </div>
+              </AlertDescription>
+            </Alert>
+          )}
         </CardContent>
       </Card>
 

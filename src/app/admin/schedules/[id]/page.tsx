@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { useFirestore } from '@/context/firestore-context';
 import { useAuth } from '@/context/auth-context';
-import { Schedule, ScheduleMember, ServiceDayConfig } from '@/types';
+import { Schedule, ScheduleMember, ServiceDayConfig, PrivacySettings } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -489,6 +489,7 @@ export default function ScheduleDetailPage() {
               if (updates.name) setName(updates.name);
               if (updates.description !== undefined) setDescription(updates.description || '');
               if (updates.serviceDayConfig) setServiceDayConfig(updates.serviceDayConfig);
+              // Note: Privacy settings are handled internally by the AdvancedScheduleSettings component
             }}
             isOwner={isOwner}
           />
