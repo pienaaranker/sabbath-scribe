@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings, Link as LinkIcon } from "lucide-react";
 import { useFirestore } from '@/context/firestore-context';
 import { useAuth } from '@/context/auth-context';
-import { Schedule } from '@/types';
+import { Schedule, ServiceDayConfig } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import ServiceDayConfigComponent from '@/components/admin/schedules/service-day-config';
+import ChurchTypeSelector from '@/components/admin/schedules/church-type-selector';
 
 export default function ScheduleSelector() {
   const { 
@@ -43,6 +45,12 @@ export default function ScheduleSelector() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newScheduleName, setNewScheduleName] = useState('');
   const [newScheduleDescription, setNewScheduleDescription] = useState('');
+  const [serviceDayConfig, setServiceDayConfig] = useState<ServiceDayConfig>({
+    primaryDay: 6, // Default to Saturday
+    additionalDays: [],
+    allowCustomDates: false
+  });
+  const [currentStep, setCurrentStep] = useState<'church-type' | 'details' | 'service-config'>('church-type');
   const [isCreating, setIsCreating] = useState(false);
 
   if (!user) {
@@ -72,6 +80,7 @@ export default function ScheduleSelector() {
       await addSchedule({
         name: newScheduleName.trim(),
         description: newScheduleDescription.trim() || undefined,
+        serviceDayConfig,
         adminUserIds: [],
       });
       
@@ -82,6 +91,12 @@ export default function ScheduleSelector() {
       
       setNewScheduleName('');
       setNewScheduleDescription('');
+      setServiceDayConfig({
+        primaryDay: 6,
+        additionalDays: [],
+        allowCustomDates: false
+      });
+      setCurrentStep('church-type');
       setIsCreateDialogOpen(false);
     } catch (error) {
       console.error('Error creating schedule:', error);
@@ -120,41 +135,94 @@ export default function ScheduleSelector() {
             <PlusCircle className="h-4 w-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Create New Schedule</DialogTitle>
+            <DialogTitle>
+              Create New Schedule
+              <span className="text-sm font-normal text-muted-foreground ml-2">
+                Step {currentStep === 'church-type' ? '1' : currentStep === 'details' ? '2' : '3'} of 3
+              </span>
+            </DialogTitle>
             <DialogDescription>
-              Create a new schedule to manage assignments and people.
+              {currentStep === 'church-type' && "Choose your church type to get started with the right service day configuration."}
+              {currentStep === 'details' && "Enter your schedule details."}
+              {currentStep === 'service-config' && "Review and customize your service day configuration."}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="schedule-name">Schedule Name</Label>
-              <Input
-                id="schedule-name"
-                placeholder="Weekly Service Schedule"
-                value={newScheduleName}
-                onChange={(e) => setNewScheduleName(e.target.value)}
+
+          <div className="py-4">
+            {currentStep === 'church-type' && (
+              <ChurchTypeSelector
+                onSelect={(config) => {
+                  setServiceDayConfig(config);
+                  setCurrentStep('details');
+                }}
+                selectedConfig={serviceDayConfig}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="schedule-description">Description (Optional)</Label>
-              <Textarea
-                id="schedule-description"
-                placeholder="Schedule for our weekly Sabbath services"
-                value={newScheduleDescription}
-                onChange={(e) => setNewScheduleDescription(e.target.value)}
-              />
-            </div>
-            <div className="flex justify-end">
-              <Button 
-                onClick={handleCreateSchedule} 
-                disabled={!newScheduleName.trim() || isCreating}
-                className="gradient-bg text-white border-0 hover:opacity-90"
-              >
-                {isCreating ? 'Creating...' : 'Create Schedule'}
-              </Button>
-            </div>
+            )}
+
+            {currentStep === 'details' && (
+              <div className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-name">Schedule Name</Label>
+                  <Input
+                    id="schedule-name"
+                    placeholder="Weekly Service Schedule"
+                    value={newScheduleName}
+                    onChange={(e) => setNewScheduleName(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="schedule-description">Description (Optional)</Label>
+                  <Textarea
+                    id="schedule-description"
+                    placeholder="Schedule for our weekly services"
+                    value={newScheduleDescription}
+                    onChange={(e) => setNewScheduleDescription(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep('church-type')}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={() => setCurrentStep('service-config')}
+                    disabled={!newScheduleName.trim()}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </div>
+            )}
+
+            {currentStep === 'service-config' && (
+              <div className="space-y-6">
+                <ServiceDayConfigComponent
+                  config={serviceDayConfig}
+                  onChange={setServiceDayConfig}
+                />
+
+                <div className="flex justify-between">
+                  <Button
+                    variant="outline"
+                    onClick={() => setCurrentStep('details')}
+                  >
+                    Back
+                  </Button>
+                  <Button
+                    onClick={handleCreateSchedule}
+                    disabled={!newScheduleName.trim() || isCreating}
+                    className="gradient-bg text-white border-0 hover:opacity-90"
+                  >
+                    {isCreating ? 'Creating...' : 'Create Schedule'}
+                  </Button>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -177,7 +245,7 @@ export default function ScheduleSelector() {
               </div>
               <div className="mt-3 pt-3 border-t border-border">
                 <Button variant="ghost" size="sm" className="w-full justify-start text-sm" asChild>
-                  <a href={`/admin/schedules`}>Manage Schedule</a>
+                  <a href={`/admin/schedules`}>Manage Schedules</a>
                 </Button>
               </div>
             </div>

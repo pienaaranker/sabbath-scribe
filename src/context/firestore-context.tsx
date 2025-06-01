@@ -243,10 +243,20 @@ export const FirestoreProvider: React.FC<FirestoreProviderProps> = ({ children }
       console.error('[addSchedule] No authenticated user');
       throw new Error('User must be authenticated to create a schedule');
     }
-    
+
+    // Ensure serviceDayConfig has a default value if not provided
+    const scheduleWithDefaults = {
+      ...schedule,
+      serviceDayConfig: schedule.serviceDayConfig || {
+        primaryDay: 6 as const, // Default to Saturday for backward compatibility
+        additionalDays: [],
+        allowCustomDates: false
+      }
+    };
+
     try {
       console.log('[addSchedule] Creating schedule for user:', user.uid);
-      const scheduleId = await scheduleService.create(user.uid, schedule);
+      const scheduleId = await scheduleService.create(user.uid, scheduleWithDefaults);
       console.log('[addSchedule] Schedule created with ID:', scheduleId);
       
       // Defensive: Wait for schedule doc to exist before initializing subcollections
