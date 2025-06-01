@@ -83,7 +83,7 @@ export default function AdminDashboardPage() {
       <div className="container max-w-4xl py-8 sm:py-12 px-4">
         <Card className="border-2 border-dashed">
           <CardHeader className="text-center px-4 sm:px-6">
-            <CardTitle className="text-xl sm:text-2xl">Welcome to SabbathScribe</CardTitle>
+            <CardTitle className="text-xl sm:text-2xl">Welcome to InService</CardTitle>
             <CardDescription className="text-sm sm:text-base">
               Get started by creating your first schedule
             </CardDescription>

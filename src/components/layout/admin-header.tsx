@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { CalendarCheck, LayoutDashboard, Users, CalendarDays, Home, LogOut, BookmarkIcon } from 'lucide-react';
+import Image from 'next/image';
+import { LayoutDashboard, Users, CalendarDays, Home, LogOut, BookmarkIcon } from 'lucide-react';
 import { APP_NAME } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -35,7 +36,13 @@ export default function AdminHeader() {
         {/* Top row: Logo and user info */}
         <div className="flex justify-between items-center mb-3 sm:mb-4">
           <div className="flex items-center gap-2">
-            <CalendarCheck className="h-6 w-6 sm:h-7 sm:w-7" />
+            <Image
+              src="/logo.png"
+              alt="InService Logo"
+              width={28}
+              height={28}
+              className="h-6 w-6 sm:h-7 sm:w-7 object-contain"
+            />
             <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2">
               <span className="text-lg sm:text-xl font-semibold">
                 <span className="hidden sm:inline">{APP_NAME} - Admin</span>

@@ -1,6 +1,6 @@
 import type { Role, RoleId } from '@/types';
 
-export const APP_NAME = 'SabbathScribe';
+export const APP_NAME = 'InService';
 
 export const ROLES_CONFIG: Role[] = [
   { id: 'preacher', name: 'Preacher' },

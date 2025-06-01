@@ -1,6 +1,6 @@
-# SabbathScribe
+# InService
 
-SabbathScribe is a modern Church Roster Management application that helps churches efficiently manage their weekly Sabbath service assignments. Built with Next.js and Firebase, it provides an intuitive interface for managing church roles, assignments, and schedules.
+InService is a modern Church Roster Management application that helps churches efficiently manage their weekly Sabbath service assignments. Built with Next.js and Firebase, it provides an intuitive interface for managing church roles, assignments, and schedules.
 
 ## Features
 
