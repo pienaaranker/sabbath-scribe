@@ -13,7 +13,7 @@ export default function HomePage() {
             InService
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-8 opacity-95">
-            Effortlessly manage your church's Sabbath schedules, assignments, and roles. Empower your team, reduce confusion, and keep everyone in sync—online and on time.
+            Effortlessly manage your church's service schedules, assignments, and roles. Empower your team, reduce confusion, and keep everyone in sync—online and on time.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 w-full max-w-md sm:max-w-none mx-auto">
             <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium py-3 px-8 rounded-lg transition-all w-full sm:w-auto">
@@ -57,7 +57,7 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <h3>Easy Assignment Management</h3>
-                <p>Assign roles and responsibilities for each Sabbath with just a few clicks. No more spreadsheets or last-minute confusion.</p>
+                <p>Assign roles and responsibilities for each service with just a few clicks. No more spreadsheets or last-minute confusion.</p>
               </div>
               <div className="feature-card text-center">
                 <div className="feature-icon mx-auto">

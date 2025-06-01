@@ -43,13 +43,13 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
   return (
     <div className="space-y-6">
       {/* Quick Access - Upcoming Holidays */}
-      <Card>
+      <Card className="border-light">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Calendar className="h-5 w-5" />
+          <CardTitle className="text-lg font-serif text-secondary flex items-center gap-2">
+            <Calendar className="h-5 w-5 text-accent" />
             Upcoming Holidays
           </CardTitle>
-          <CardDescription>
+          <CardDescription className="text-muted-foreground">
             Quick access to the next few holidays
           </CardDescription>
         </CardHeader>
@@ -59,15 +59,15 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
               <Button
                 key={holiday.id}
                 variant="outline"
-                className="justify-start h-auto p-3"
+                className="justify-start h-auto p-3 border-light hover:bg-light hover:border-accent"
                 onClick={() => handleHolidaySelect(holiday)}
               >
                 <div className="flex items-center gap-3 w-full">
-                  <div className="text-primary">
+                  <div className="text-accent">
                     {HOLIDAY_ICON}
                   </div>
                   <div className="flex-1 text-left">
-                    <div className="font-medium text-sm">{holiday.name}</div>
+                    <div className="font-medium text-sm text-secondary">{holiday.name}</div>
                     <div className="text-xs text-muted-foreground">
                       {formatDateForDisplay(holiday.date)}
                     </div>
@@ -81,10 +81,10 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
       </Card>
 
       {/* Full Holiday Browser */}
-      <Card>
+      <Card className="border-light">
         <CardHeader className="pb-3">
-          <CardTitle className="text-lg">Browse All Holidays</CardTitle>
-          <CardDescription>
+          <CardTitle className="text-lg font-serif text-secondary">Browse All Holidays</CardTitle>
+          <CardDescription className="text-muted-foreground">
             Browse holidays by year
           </CardDescription>
         </CardHeader>
@@ -93,7 +93,7 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
           <div className="flex gap-4">
             <div className="flex-1">
               <Select value={selectedYear.toString()} onValueChange={(value) => setSelectedYear(parseInt(value))}>
-                <SelectTrigger>
+                <SelectTrigger className="border-light focus:ring-primary focus:border-primary">
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
                 <SelectContent>
@@ -118,15 +118,15 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
                 <Button
                   key={holiday.id}
                   variant="ghost"
-                  className="justify-start h-auto p-3 w-full"
+                  className="justify-start h-auto p-3 w-full hover:bg-light"
                   onClick={() => handleHolidaySelect(holiday)}
                 >
                   <div className="flex items-center gap-3 w-full">
-                    <div className="text-primary">
+                    <div className="text-accent">
                       {HOLIDAY_ICON}
                     </div>
                     <div className="flex-1 text-left">
-                      <div className="font-medium text-sm">{holiday.name}</div>
+                      <div className="font-medium text-sm text-secondary">{holiday.name}</div>
                       <div className="text-xs text-muted-foreground">
                         {formatDateForDisplay(holiday.date)}
                       </div>

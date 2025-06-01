@@ -216,7 +216,7 @@ export default function ScheduleSelector() {
                   <Button
                     onClick={handleCreateSchedule}
                     disabled={!newScheduleName.trim() || isCreating}
-                    className="gradient-bg text-white border-0 hover:opacity-90"
+                    className="bg-secondary hover:bg-secondary/90 text-white border-0"
                   >
                     {isCreating ? 'Creating...' : 'Create Schedule'}
                   </Button>

@@ -93,7 +93,7 @@ export default function AdminDashboardPage() {
               <Calendar className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
             </div>
             <p className="text-center text-muted-foreground mb-4 sm:mb-6 max-w-md text-sm sm:text-base">
-              A schedule is where you'll manage your church's Sabbath assignments.
+              A schedule is where you'll manage your church's service assignments.
               You can create multiple schedules for different purposes or congregations.
             </p>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -125,7 +125,7 @@ export default function AdminDashboardPage() {
                     <Label htmlFor="new-schedule-description" className="text-secondary font-medium">Description (Optional)</Label>
                     <Textarea
                       id="new-schedule-description"
-                      placeholder="Schedule for our weekly Sabbath services"
+                      placeholder="Schedule for our weekly services"
                       value={newScheduleDescription}
                       onChange={(e) => setNewScheduleDescription(e.target.value)}
                       className="border-border focus:ring-primary focus:border-primary"
@@ -180,7 +180,7 @@ export default function AdminDashboardPage() {
             />
             <DashboardActionCard
               title="Manage Assignments"
-              description="Assign roles for specific Sabbaths and view upcoming schedules."
+              description="Assign roles for specific services and view upcoming schedules."
               link="/admin/assignments"
               actionText="Go to Assignments"
               imageSrc="/clipboard.jpeg"

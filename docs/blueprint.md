@@ -1,4 +1,4 @@
-# **App Name**: SabbathScribe
+# **App Name**: InService
 
 ## Core Features:
 

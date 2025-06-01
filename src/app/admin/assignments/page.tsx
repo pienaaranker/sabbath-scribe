@@ -21,11 +21,11 @@ export default function AssignmentsPage() {
           </Button>
         </div>
         <div className="text-center py-8 sm:py-12">
-          <h2 className="text-xl sm:text-2xl font-bold mb-4">No Schedule Selected</h2>
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-secondary mb-4">No Schedule Selected</h2>
           <p className="text-muted-foreground mb-6 text-sm sm:text-base px-4">
             Please select a schedule from the dropdown above to manage assignments.
           </p>
-          <Button onClick={() => router.push('/admin')} className="gradient-bg text-white border-0 hover:opacity-90">
+          <Button onClick={() => router.push('/admin')} className="bg-secondary hover:bg-secondary/90 text-white border-0">
             Return to Dashboard
           </Button>
         </div>

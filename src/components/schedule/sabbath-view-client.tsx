@@ -18,17 +18,17 @@ const ALL_ROLES_FILTER_VALUE = "all_roles_filter_val";
 const ALL_PEOPLE_FILTER_VALUE = "all_people_filter_val";
 
 const AssignmentDisplayCard: React.FC<{ assignment: SabbathAssignment, isUnassigned: boolean }> = ({ assignment, isUnassigned }) => {
-  const cardClasses = isUnassigned 
-    ? "bg-card border-destructive/30" 
-    : "feature-card";
-  const personNameClasses = isUnassigned 
-    ? "text-destructive font-semibold text-lg" 
-    : "text-primary font-semibold text-lg";
+  const cardClasses = isUnassigned
+    ? "bg-white border border-destructive/30 shadow-md"
+    : "bg-white border border-light shadow-md";
+  const personNameClasses = isUnassigned
+    ? "text-destructive font-semibold text-lg"
+    : "text-secondary font-semibold text-lg";
 
   return (
-    <div className={`${cardClasses} p-4`}>
-      <div className="border-b border-border pb-2 mb-3">
-        <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">{assignment.roleName}</h3>
+    <div className={`${cardClasses} p-4 rounded-xl`}>
+      <div className="border-b border-light pb-2 mb-3">
+        <h3 className="text-sm font-medium text-accent uppercase tracking-wide font-serif">{assignment.roleName}</h3>
       </div>
       {assignment.person ? (
         <div className="flex items-center justify-between">
@@ -164,7 +164,7 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
       <div className="container">
         <div className="text-center py-20">
           <p className="text-destructive mb-4">{publicError || error}</p>
-          <Button onClick={() => window.location.reload()}>Try Again</Button>
+          <Button onClick={() => window.location.reload()} className="bg-secondary hover:bg-secondary/90 text-white">Try Again</Button>
         </div>
       </div>
     );
@@ -173,17 +173,17 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
   return (
     <div className="container">
       <section className="section">
-        <h2 className="section-title">{getServiceDayName(serviceDayConfig.primaryDay)} Schedule</h2>
-        
+        <h2 className="text-3xl sm:text-4xl font-serif font-bold text-secondary text-center mb-8">{getServiceDayName(serviceDayConfig.primaryDay)} Schedule</h2>
+
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content Column */}
           <div className="lg:col-span-3">
-            <div className="bg-muted/30 p-4 rounded-lg mb-8">
+            <div className="bg-light/30 p-4 rounded-lg mb-8 border border-light">
               <div className="flex flex-col sm:flex-row gap-2 items-center">
                 <div className="flex items-center gap-1 w-full sm:w-auto">
-                  <Filter className="h-4 w-4 text-muted-foreground" />
+                  <Filter className="h-4 w-4 text-accent" />
                   <Select value={filterRole} onValueChange={(value) => setFilterRole(value === ALL_ROLES_FILTER_VALUE ? '' : value)}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px] border-light focus:ring-primary focus:border-primary">
                       <SelectValue placeholder="Filter by Role" />
                     </SelectTrigger>
                     <SelectContent>
@@ -195,9 +195,9 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
                   </Select>
                 </div>
                 <div className="flex items-center gap-1 w-full sm:w-auto">
-                  <Users className="h-4 w-4 text-muted-foreground" />
+                  <Users className="h-4 w-4 text-accent" />
                   <Select value={filterPerson} onValueChange={(value) => setFilterPerson(value === ALL_PEOPLE_FILTER_VALUE ? '' : value)}>
-                    <SelectTrigger className="w-full sm:w-[180px]">
+                    <SelectTrigger className="w-full sm:w-[180px] border-light focus:ring-primary focus:border-primary">
                       <SelectValue placeholder="Filter by Person" />
                     </SelectTrigger>
                     <SelectContent>
@@ -209,13 +209,13 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
                   </Select>
                 </div>
                 <div className="flex items-center gap-1 w-full sm:flex-1">
-                  <Search className="h-4 w-4 text-muted-foreground" />
-                  <Input 
-                    type="search" 
-                    placeholder="Search by role or name..." 
+                  <Search className="h-4 w-4 text-accent" />
+                  <Input
+                    type="search"
+                    placeholder="Search by role or name..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
+                    className="w-full border-light focus:ring-primary focus:border-primary"
                   />
                 </div>
               </div>
@@ -233,33 +233,37 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
               </div>
             ) : (
               <div className="text-center py-10 text-muted-foreground">
-                <Image src="/clipboard.jpeg" alt="No assignments" width={300} height={200} className="mx-auto mb-4 rounded-md" data-ai-hint="empty state document" />
-                <p className="text-lg">No assignments found for this date or matching your filters.</p>
-                <p>Try adjusting the date or clearing filters.</p>
+                <div className="bg-white rounded-xl shadow-md border border-light p-8">
+                  <User className="h-16 w-16 text-accent mx-auto mb-4" />
+                  <p className="text-lg font-serif text-secondary mb-2">No assignments found for this date or matching your filters.</p>
+                  <p>Try adjusting the date or clearing filters.</p>
+                </div>
               </div>
             )}
           </div>
 
           {/* Calendar Column */}
           <div className="lg:col-span-1">
-            <div className="bg-card rounded-lg p-4 sticky top-4">
+            <div className="bg-white rounded-xl shadow-md border border-light p-4 sticky top-4">
               <div className="flex flex-col space-y-4">
                 {/* Date Navigation */}
                 <div className="flex items-center justify-between px-1">
-                  <Button 
-                    variant="ghost" 
+                  <Button
+                    variant="ghost"
                     size="sm"
                     onClick={() => setSelectedDate(getPreviousMonth(selectedDate, serviceDayConfig.primaryDay))}
+                    className="text-accent hover:text-primary hover:bg-light"
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
-                  <p className="text-sm font-medium">
+                  <p className="text-sm font-medium text-secondary">
                     {formatDateForDisplay(selectedDate)}
                   </p>
-                  <Button 
+                  <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setSelectedDate(getNextMonth(selectedDate, serviceDayConfig.primaryDay))}
+                    className="text-accent hover:text-primary hover:bg-light"
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -269,7 +273,7 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
                 <div className="space-y-4">
                   {/* Month and Year */}
                   <div className="text-center">
-                    <div className="font-medium">
+                    <div className="font-serif font-medium text-secondary">
                       {selectedDate.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </div>
                   </div>
@@ -277,7 +281,7 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
                   {/* Days of Week */}
                   <div className="grid grid-cols-7 gap-1 text-center">
                     {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map((day) => (
-                      <div key={day} className="text-xs text-muted-foreground font-medium py-1">
+                      <div key={day} className="text-xs text-accent font-medium py-1">
                         {day}
                       </div>
                     ))}
@@ -307,8 +311,8 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
                           className={`
                             p-2 text-sm rounded-md relative
                             ${!isCurrentMonth && 'text-muted-foreground/50'}
-                            ${isSameDay && 'bg-primary text-primary-foreground'}
-                            ${isValidServiceDay && !isSameDay && 'hover:bg-muted cursor-pointer'}
+                            ${isSameDay && 'bg-secondary text-white'}
+                            ${isValidServiceDay && !isSameDay && 'hover:bg-light cursor-pointer text-secondary'}
                             ${!isValidServiceDay && 'cursor-not-allowed opacity-50'}
                           `}
                         >
@@ -323,9 +327,9 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
           </div>
         </div>
       </section>
-      
+
       <footer className="py-12 text-center text-sm text-muted-foreground">
-        © {new Date().getFullYear()} SabbathScribe. All rights reserved.
+        © {new Date().getFullYear()} InService. All rights reserved.
       </footer>
     </div>
   );
