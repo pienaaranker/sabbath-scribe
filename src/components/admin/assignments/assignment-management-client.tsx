@@ -232,7 +232,7 @@ export default function AssignmentManagementClient() {
 
       {/* Right: Calendar */}
       <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
-        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:sticky lg:top-8">
+        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-bold mb-4 text-center lg:text-left">
             Select {getServiceDayName(serviceDayConfig.primaryDay)}
           </h2>

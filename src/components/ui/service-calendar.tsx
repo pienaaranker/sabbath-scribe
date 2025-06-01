@@ -18,6 +18,7 @@ function ServiceCalendar({
   classNames,
   showOutsideDays = true,
   serviceDayConfig,
+  selected,
   ...props
 }: ServiceCalendarProps) {
   
@@ -54,10 +55,20 @@ function ServiceCalendar({
     return getDisabledDates;
   }, [props.disabled, getDisabledDates]);
 
+  // Determine the month to display - use selected date's month if available
+  const displayMonth = React.useMemo(() => {
+    if (selected && selected instanceof Date) {
+      return selected;
+    }
+    return props.month || new Date();
+  }, [selected, props.month]);
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
       className={cn("p-3", className)}
+      month={displayMonth}
+      selected={selected}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",

@@ -62,8 +62,8 @@ const CHURCH_TYPES: ChurchType[] = [
     }
   },
   {
-    id: 'flexible-christian',
-    name: 'Flexible Christian Community',
+    id: 'flexible-community',
+    name: 'Flexible Community',
     description: 'Non-denominational with flexible scheduling',
     icon: <Users className="h-5 w-5" />,
     serviceDayConfig: {

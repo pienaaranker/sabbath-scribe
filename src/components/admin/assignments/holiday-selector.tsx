@@ -3,7 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar, Church } from 'lucide-react';
 import { getHolidaysForYear, getUpcomingHolidays, Holiday } from '@/lib/holidays';
@@ -14,13 +14,7 @@ interface HolidaySelectorProps {
   currentYear?: number;
 }
 
-const HOLIDAY_TYPE_ICONS = {
-  christian: <Church className="h-4 w-4" />
-};
-
-const HOLIDAY_TYPE_COLORS = {
-  christian: 'bg-blue-100 text-blue-800 border-blue-200'
-};
+const HOLIDAY_ICON = <Church className="h-4 w-4" />;
 
 export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySelectorProps) {
   const [selectedYear, setSelectedYear] = useState(currentYear || new Date().getFullYear());
@@ -53,10 +47,10 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
         <CardHeader className="pb-3">
           <CardTitle className="text-lg flex items-center gap-2">
             <Calendar className="h-5 w-5" />
-            Upcoming Christian Holidays
+            Upcoming Holidays
           </CardTitle>
           <CardDescription>
-            Quick access to the next few Christian holidays
+            Quick access to the next few holidays
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -70,7 +64,7 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
               >
                 <div className="flex items-center gap-3 w-full">
                   <div className="text-primary">
-                    {HOLIDAY_TYPE_ICONS[holiday.type]}
+                    {HOLIDAY_ICON}
                   </div>
                   <div className="flex-1 text-left">
                     <div className="font-medium text-sm">{holiday.name}</div>
@@ -78,12 +72,7 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
                       {formatDateForDisplay(holiday.date)}
                     </div>
                   </div>
-                  <Badge 
-                    variant="outline" 
-                    className={`text-xs ${HOLIDAY_TYPE_COLORS[holiday.type]}`}
-                  >
-                    {holiday.type}
-                  </Badge>
+
                 </div>
               </Button>
             ))}
@@ -96,7 +85,7 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
         <CardHeader className="pb-3">
           <CardTitle className="text-lg">Browse All Holidays</CardTitle>
           <CardDescription>
-            Browse Christian holidays by year
+            Browse holidays by year
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -134,28 +123,20 @@ export default function HolidaySelector({ onSelectDate, currentYear }: HolidaySe
                 >
                   <div className="flex items-center gap-3 w-full">
                     <div className="text-primary">
-                      {HOLIDAY_TYPE_ICONS[holiday.type]}
+                      {HOLIDAY_ICON}
                     </div>
                     <div className="flex-1 text-left">
                       <div className="font-medium text-sm">{holiday.name}</div>
                       <div className="text-xs text-muted-foreground">
                         {formatDateForDisplay(holiday.date)}
-                        {holiday.description && ` • ${holiday.description}`}
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      {holiday.isMoveable && (
-                        <Badge variant="outline" className="text-xs">
-                          Moveable
-                        </Badge>
+                      {holiday.description && (
+                        <div className="text-xs text-muted-foreground">
+                          {holiday.description}
+                        </div>
                       )}
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${HOLIDAY_TYPE_COLORS[holiday.type]}`}
-                      >
-                        {holiday.type}
-                      </Badge>
                     </div>
+
                   </div>
                 </Button>
               ))

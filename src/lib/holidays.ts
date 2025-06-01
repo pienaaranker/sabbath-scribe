@@ -4,12 +4,12 @@ export interface Holiday {
   id: string;
   name: string;
   date: Date;
-  type: 'christian';
+  type: 'holiday';
   description?: string;
   isMoveable: boolean; // Whether the date changes each year
 }
 
-// Calculate Easter Sunday for a given year (Western Christianity)
+// Calculate Easter Sunday for a given year
 function calculateEaster(year: number): Date {
   const a = year % 19;
   const b = Math.floor(year / 100);
@@ -35,12 +35,12 @@ export function getHolidaysForYear(year: number): Holiday[] {
   const easter = calculateEaster(year);
 
   return [
-    // Fixed Christian Holidays
+    // Fixed Holidays
     {
       id: 'epiphany',
       name: 'Epiphany',
       date: new Date(year, 0, 6),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Celebration of the visit of the Magi',
       isMoveable: false
     },
@@ -48,7 +48,7 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'christmas-eve',
       name: 'Christmas Eve',
       date: new Date(year, 11, 24),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Evening before Christmas',
       isMoveable: false
     },
@@ -56,17 +56,17 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'christmas',
       name: 'Christmas Day',
       date: new Date(year, 11, 25),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Celebration of the birth of Jesus Christ',
       isMoveable: false
     },
 
-    // Moveable Christian Holidays (based on Easter)
+    // Moveable Holidays (based on Easter)
     {
       id: 'palm-sunday',
       name: 'Palm Sunday',
       date: subDays(easter, 7),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Sunday before Easter',
       isMoveable: true
     },
@@ -74,7 +74,7 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'maundy-thursday',
       name: 'Maundy Thursday',
       date: subDays(easter, 3),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Thursday before Easter',
       isMoveable: true
     },
@@ -82,7 +82,7 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'good-friday',
       name: 'Good Friday',
       date: subDays(easter, 2),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Friday before Easter',
       isMoveable: true
     },
@@ -90,7 +90,7 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'easter-sunday',
       name: 'Easter Sunday',
       date: easter,
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Celebration of the resurrection of Jesus Christ',
       isMoveable: true
     },
@@ -98,7 +98,7 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'easter-monday',
       name: 'Easter Monday',
       date: addDays(easter, 1),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Monday after Easter',
       isMoveable: true
     },
@@ -106,7 +106,7 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'ascension-day',
       name: 'Ascension Day',
       date: addDays(easter, 39),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: '39 days after Easter',
       isMoveable: true
     },
@@ -114,17 +114,17 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'pentecost',
       name: 'Pentecost',
       date: addDays(easter, 49),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: '49 days after Easter',
       isMoveable: true
     },
 
-    // Additional Christian Holidays
+    // Additional Holidays
     {
       id: 'ash-wednesday',
       name: 'Ash Wednesday',
       date: subDays(easter, 46),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Beginning of Lent',
       isMoveable: true
     },
@@ -132,7 +132,7 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'trinity-sunday',
       name: 'Trinity Sunday',
       date: addDays(easter, 56),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'First Sunday after Pentecost',
       isMoveable: true
     },
@@ -140,7 +140,7 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'corpus-christi',
       name: 'Corpus Christi',
       date: addDays(easter, 60),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Feast of the Body and Blood of Christ',
       isMoveable: true
     },
@@ -148,15 +148,15 @@ export function getHolidaysForYear(year: number): Holiday[] {
       id: 'all-saints',
       name: 'All Saints Day',
       date: new Date(year, 10, 1), // November 1st
-      type: 'christian' as const,
-      description: 'Celebration of all Christian saints',
+      type: 'holiday' as const,
+      description: 'Celebration of all saints',
       isMoveable: false
     },
     {
       id: 'advent-first',
       name: 'First Sunday of Advent',
       date: subDays(new Date(year, 11, 25), ((new Date(year, 11, 25).getDay() + 7 - 0) % 7) + 21),
-      type: 'christian' as const,
+      type: 'holiday' as const,
       description: 'Beginning of the Advent season',
       isMoveable: true
     }
