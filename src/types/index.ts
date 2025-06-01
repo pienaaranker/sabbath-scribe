@@ -35,6 +35,15 @@ export interface SabbathAssignment {
   person: Person | null;
 }
 
+// Service day configuration
+export type ServiceDay = 0 | 1 | 2 | 3 | 4 | 5 | 6; // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+
+export interface ServiceDayConfig {
+  primaryDay: ServiceDay; // Main service day (e.g., 6 for Saturday, 0 for Sunday)
+  additionalDays?: ServiceDay[]; // Optional additional service days
+  allowCustomDates?: boolean; // Allow scheduling on any date (for holidays, special events)
+}
+
 // New types for multi-tenant structure
 export interface Schedule {
   id: string;
@@ -42,6 +51,7 @@ export interface Schedule {
   description?: string;
   ownerId: string; // User ID of the owner
   adminUserIds: string[]; // List of user IDs who can manage this schedule
+  serviceDayConfig: ServiceDayConfig; // Service day configuration
   createdAt: Date | string;
   updatedAt: Date | string;
 }

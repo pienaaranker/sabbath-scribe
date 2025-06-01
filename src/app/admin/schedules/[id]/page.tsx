@@ -5,7 +5,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { useFirestore } from '@/context/firestore-context';
 import { useAuth } from '@/context/auth-context';
-import { Schedule, ScheduleMember } from '@/types';
+import { Schedule, ScheduleMember, ServiceDayConfig } from '@/types';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -49,6 +49,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UserPlus, Trash2, Mail, ExternalLink, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
+import ServiceDayConfigComponent from '@/components/admin/schedules/service-day-config';
+import { getServiceDayName } from '@/lib/date-utils';
 
 export default function ScheduleDetailPage() {
   const params = useParams();
@@ -61,6 +63,11 @@ export default function ScheduleDetailPage() {
   const [isOwner, setIsOwner] = useState(false);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
+  const [serviceDayConfig, setServiceDayConfig] = useState<ServiceDayConfig>({
+    primaryDay: 6,
+    additionalDays: [],
+    allowCustomDates: false
+  });
   const [isEditing, setIsEditing] = useState(false);
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteRole, setInviteRole] = useState<'admin' | 'viewer'>('viewer');
@@ -80,6 +87,11 @@ export default function ScheduleDetailPage() {
       setSchedule(foundSchedule);
       setName(foundSchedule.name);
       setDescription(foundSchedule.description || '');
+      setServiceDayConfig(foundSchedule.serviceDayConfig || {
+        primaryDay: 6,
+        additionalDays: [],
+        allowCustomDates: false
+      });
       setIsOwner(foundSchedule.ownerId === user?.uid);
     } else if (schedules.length > 0) {
       // Schedule not found, redirect
@@ -95,7 +107,8 @@ export default function ScheduleDetailPage() {
       
       await updateSchedule(schedule.id, {
         name: name.trim(),
-        description: description.trim() || undefined
+        description: description.trim() || undefined,
+        serviceDayConfig
       });
       
       toast({
@@ -217,7 +230,20 @@ export default function ScheduleDetailPage() {
         <Button variant="ghost" onClick={() => router.push('/admin')} className="h-8 w-8 p-0">
           <ArrowLeft className="h-4 w-4" />
         </Button>
-        <h2 className="text-2xl font-bold">{schedule.name}</h2>
+        <div className="flex-1">
+          <h2 className="text-2xl font-bold">{schedule.name}</h2>
+          {schedule.serviceDayConfig && (
+            <div className="text-sm text-muted-foreground mt-1">
+              <strong>Service Day:</strong> {getServiceDayName(schedule.serviceDayConfig.primaryDay)}
+              {schedule.serviceDayConfig.additionalDays && schedule.serviceDayConfig.additionalDays.length > 0 && (
+                <span> + {schedule.serviceDayConfig.additionalDays.map(getServiceDayName).join(', ')}</span>
+              )}
+              {schedule.serviceDayConfig.allowCustomDates && (
+                <span> (Custom dates allowed)</span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       <Tabs defaultValue="members">
@@ -383,10 +409,10 @@ export default function ScheduleDetailPage() {
             <CardHeader>
               <CardTitle>Schedule Settings</CardTitle>
               <CardDescription>
-                Update your schedule settings.
+                Update your schedule settings and service day configuration.
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-6">
               <div className="space-y-2">
                 <Label htmlFor="schedule-name">Schedule Name</Label>
                 <Input
@@ -404,6 +430,12 @@ export default function ScheduleDetailPage() {
                   rows={3}
                 />
               </div>
+
+              {/* Service Day Configuration */}
+              <ServiceDayConfigComponent
+                config={serviceDayConfig}
+                onChange={setServiceDayConfig}
+              />
             </CardContent>
             <CardFooter className="flex justify-between">
               <Button

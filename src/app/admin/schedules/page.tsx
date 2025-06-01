@@ -11,6 +11,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { Pencil, Trash2, PlusCircle } from "lucide-react";
 import Link from "next/link";
+import { ServiceDayConfig } from "@/types";
+import ServiceDayConfigComponent from "@/components/admin/schedules/service-day-config";
+import ScheduleMigration from "@/components/admin/schedules/schedule-migration";
+import { getServiceDayName } from "@/lib/date-utils";
 
 export default function SchedulesManagementPage() {
   const { schedules, addSchedule, updateSchedule, deleteSchedule, loading, error } = useFirestore();
@@ -19,11 +23,21 @@ export default function SchedulesManagementPage() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [newScheduleName, setNewScheduleName] = useState("");
   const [newScheduleDescription, setNewScheduleDescription] = useState("");
+  const [serviceDayConfig, setServiceDayConfig] = useState<ServiceDayConfig>({
+    primaryDay: 6, // Default to Saturday
+    additionalDays: [],
+    allowCustomDates: false
+  });
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editScheduleId, setEditScheduleId] = useState<string | null>(null);
   const [editScheduleName, setEditScheduleName] = useState("");
   const [editScheduleDescription, setEditScheduleDescription] = useState("");
+  const [editServiceDayConfig, setEditServiceDayConfig] = useState<ServiceDayConfig>({
+    primaryDay: 6,
+    additionalDays: [],
+    allowCustomDates: false
+  });
 
   const handleCreateSchedule = async () => {
     if (!newScheduleName.trim()) {
@@ -32,10 +46,20 @@ export default function SchedulesManagementPage() {
     }
     try {
       setIsCreating(true);
-      await addSchedule({ name: newScheduleName.trim(), description: newScheduleDescription.trim() || undefined, adminUserIds: [] });
+      await addSchedule({
+        name: newScheduleName.trim(),
+        description: newScheduleDescription.trim() || undefined,
+        serviceDayConfig,
+        adminUserIds: []
+      });
       toast({ title: "Schedule Created", description: "Your new schedule has been created successfully." });
       setNewScheduleName("");
       setNewScheduleDescription("");
+      setServiceDayConfig({
+        primaryDay: 6,
+        additionalDays: [],
+        allowCustomDates: false
+      });
       setDialogOpen(false);
     } catch (error) {
       toast({ title: "Error", description: "Failed to create schedule. Please try again.", variant: "destructive" });
@@ -44,10 +68,15 @@ export default function SchedulesManagementPage() {
     }
   };
 
-  const openEditDialog = (schedule: { id: string; name: string; description?: string }) => {
+  const openEditDialog = (schedule: { id: string; name: string; description?: string; serviceDayConfig?: ServiceDayConfig }) => {
     setEditScheduleId(schedule.id);
     setEditScheduleName(schedule.name);
     setEditScheduleDescription(schedule.description || "");
+    setEditServiceDayConfig(schedule.serviceDayConfig || {
+      primaryDay: 6, // Default to Saturday if no config exists
+      additionalDays: [],
+      allowCustomDates: false
+    });
     setEditDialogOpen(true);
   };
 
@@ -58,7 +87,11 @@ export default function SchedulesManagementPage() {
     }
     try {
       setIsEditing(true);
-      await updateSchedule(editScheduleId, { name: editScheduleName.trim(), description: editScheduleDescription.trim() || undefined });
+      await updateSchedule(editScheduleId, {
+        name: editScheduleName.trim(),
+        description: editScheduleDescription.trim() || undefined,
+        serviceDayConfig: editServiceDayConfig
+      });
       toast({ title: "Schedule Updated", description: "Schedule updated successfully." });
       setEditDialogOpen(false);
     } catch (error) {
@@ -80,6 +113,11 @@ export default function SchedulesManagementPage() {
 
   return (
     <div className="container max-w-3xl py-10">
+      {/* Migration Component */}
+      <div className="mb-8">
+        <ScheduleMigration />
+      </div>
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Manage Schedules</h1>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
@@ -88,20 +126,26 @@ export default function SchedulesManagementPage() {
               <PlusCircle className="mr-2 h-4 w-4" /> New Schedule
             </Button>
           </DialogTrigger>
-          <DialogContent>
+          <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
             <DialogHeader>
               <DialogTitle>Create New Schedule</DialogTitle>
               <DialogDescription>Create a new schedule to manage assignments and people.</DialogDescription>
             </DialogHeader>
-            <div className="space-y-4 py-4">
+            <div className="space-y-6 py-4">
               <div className="space-y-2">
                 <Label htmlFor="new-schedule-name">Schedule Name</Label>
                 <Input id="new-schedule-name" placeholder="Weekly Service Schedule" value={newScheduleName} onChange={e => setNewScheduleName(e.target.value)} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="new-schedule-description">Description (Optional)</Label>
-                <Textarea id="new-schedule-description" placeholder="Schedule for our weekly Sabbath services" value={newScheduleDescription} onChange={e => setNewScheduleDescription(e.target.value)} />
+                <Textarea id="new-schedule-description" placeholder="Schedule for our weekly services" value={newScheduleDescription} onChange={e => setNewScheduleDescription(e.target.value)} />
               </div>
+
+              {/* Service Day Configuration */}
+              <ServiceDayConfigComponent
+                config={serviceDayConfig}
+                onChange={setServiceDayConfig}
+              />
             </div>
             <DialogFooter>
               <Button onClick={handleCreateSchedule} disabled={!newScheduleName.trim() || isCreating} className="gradient-bg text-white border-0 hover:opacity-90">
@@ -124,6 +168,17 @@ export default function SchedulesManagementPage() {
               <CardHeader>
                 <CardTitle>{schedule.name}</CardTitle>
                 {schedule.description && <CardDescription>{schedule.description}</CardDescription>}
+                {schedule.serviceDayConfig && (
+                  <div className="text-sm text-muted-foreground mt-2">
+                    <strong>Service Day:</strong> {getServiceDayName(schedule.serviceDayConfig.primaryDay)}
+                    {schedule.serviceDayConfig.additionalDays && schedule.serviceDayConfig.additionalDays.length > 0 && (
+                      <span> + {schedule.serviceDayConfig.additionalDays.map(getServiceDayName).join(', ')}</span>
+                    )}
+                    {schedule.serviceDayConfig.allowCustomDates && (
+                      <span> (Custom dates allowed)</span>
+                    )}
+                  </div>
+                )}
               </CardHeader>
               <CardContent>
                 <div className="flex gap-2">
@@ -139,12 +194,12 @@ export default function SchedulesManagementPage() {
         </div>
       )}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Schedule</DialogTitle>
-            <DialogDescription>Update the schedule details below.</DialogDescription>
+            <DialogDescription>Update the schedule details and service day configuration below.</DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-6 py-4">
             <div className="space-y-2">
               <Label htmlFor="edit-schedule-name">Schedule Name</Label>
               <Input id="edit-schedule-name" value={editScheduleName} onChange={e => setEditScheduleName(e.target.value)} />
@@ -153,6 +208,12 @@ export default function SchedulesManagementPage() {
               <Label htmlFor="edit-schedule-description">Description (Optional)</Label>
               <Textarea id="edit-schedule-description" value={editScheduleDescription} onChange={e => setEditScheduleDescription(e.target.value)} />
             </div>
+
+            {/* Service Day Configuration */}
+            <ServiceDayConfigComponent
+              config={editServiceDayConfig}
+              onChange={setEditServiceDayConfig}
+            />
           </div>
           <DialogFooter>
             <Button onClick={handleEditSchedule} disabled={!editScheduleName.trim() || isEditing} className="gradient-bg text-white border-0 hover:opacity-90">

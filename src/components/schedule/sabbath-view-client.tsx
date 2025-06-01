@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useFirestore } from '@/context/firestore-context';
 import { ROLES_CONFIG, ROLE_NAMES_MAP } from '@/lib/constants';
 import type { Person, SabbathAssignment, RoleId } from '@/types';
-import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb } from '@/lib/date-utils';
+import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb, getNearestServiceDay, getNextServiceDay, getPreviousServiceDay, getServiceDayName } from '@/lib/date-utils';
 import { ChevronLeft, ChevronRight, Users, CalendarIcon, Filter, Search, Clipboard, User, Calendar } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
@@ -51,21 +51,21 @@ const AssignmentDisplayCard: React.FC<{ assignment: SabbathAssignment, isUnassig
   );
 };
 
-const getNextMonth = (date: Date): Date => {
+const getNextMonth = (date: Date, serviceDay: number): Date => {
   const nextMonth = new Date(date);
   nextMonth.setMonth(nextMonth.getMonth() + 1, 1);
-  // Find the first Saturday of the next month
-  while (nextMonth.getDay() !== 6) {
+  // Find the first service day of the next month
+  while (nextMonth.getDay() !== serviceDay) {
     nextMonth.setDate(nextMonth.getDate() + 1);
   }
   return nextMonth;
 };
 
-const getPreviousMonth = (date: Date): Date => {
+const getPreviousMonth = (date: Date, serviceDay: number): Date => {
   const prevMonth = new Date(date);
   prevMonth.setMonth(prevMonth.getMonth() - 1, 1);
-  // Find the first Saturday of the previous month
-  while (prevMonth.getDay() !== 6) {
+  // Find the first service day of the previous month
+  while (prevMonth.getDay() !== serviceDay) {
     prevMonth.setDate(prevMonth.getDate() + 1);
   }
   return prevMonth;
@@ -79,7 +79,12 @@ interface SabbathViewClientProps {
 // Accept the prop
 export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps) {
   const { people, getSabbathAssignments, loading, error, setCurrentScheduleById, currentSchedule } = useFirestore();
-  const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
+
+  // Use service day configuration from current schedule, fallback to Saturday
+  const serviceDayConfig = currentSchedule?.serviceDayConfig || { primaryDay: 6, additionalDays: [], allowCustomDates: false };
+  const [selectedDate, setSelectedDate] = useState<Date>(() =>
+    getNearestServiceDay(new Date(), serviceDayConfig.primaryDay)
+  );
   const [filterRole, setFilterRole] = useState<string>('');
   const [filterPerson, setFilterPerson] = useState<string>('');
   const [searchTerm, setSearchTerm] = useState<string>('');
@@ -134,7 +139,12 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      setSelectedDate(getNearestSaturday(date));
+      // If custom dates are allowed, use the date as-is, otherwise snap to nearest service day
+      if (serviceDayConfig.allowCustomDates) {
+        setSelectedDate(date);
+      } else {
+        setSelectedDate(getNearestServiceDay(date, serviceDayConfig.primaryDay));
+      }
     }
   };
 
@@ -163,7 +173,7 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
   return (
     <div className="container">
       <section className="section">
-        <h2 className="section-title">Sabbath Schedule</h2>
+        <h2 className="section-title">{getServiceDayName(serviceDayConfig.primaryDay)} Schedule</h2>
         
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           {/* Main Content Column */}
@@ -239,7 +249,7 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
                   <Button 
                     variant="ghost" 
                     size="sm"
-                    onClick={() => setSelectedDate(getPreviousMonth(selectedDate))}
+                    onClick={() => setSelectedDate(getPreviousMonth(selectedDate, serviceDayConfig.primaryDay))}
                   >
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
@@ -249,7 +259,7 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
                   <Button 
                     variant="ghost"
                     size="sm"
-                    onClick={() => setSelectedDate(getNextMonth(selectedDate))}
+                    onClick={() => setSelectedDate(getNextMonth(selectedDate, serviceDayConfig.primaryDay))}
                   >
                     <ChevronRight className="h-4 w-4" />
                   </Button>
@@ -283,19 +293,23 @@ export default function SabbathViewClient({ scheduleId }: SabbathViewClientProps
 
                       const isCurrentMonth = date.getMonth() === selectedDate.getMonth();
                       const isSameDay = date.toDateString() === selectedDate.toDateString();
-                      const isSaturday = date.getDay() === 6;
+
+                      // Check if this date is a valid service day
+                      const isValidServiceDay = serviceDayConfig.allowCustomDates ||
+                        date.getDay() === serviceDayConfig.primaryDay ||
+                        (serviceDayConfig.additionalDays && serviceDayConfig.additionalDays.includes(date.getDay() as any));
 
                       return (
                         <button
                           key={i}
-                          onClick={() => isSaturday && handleDateChange(date)}
-                          disabled={!isSaturday}
+                          onClick={() => isValidServiceDay && handleDateChange(date)}
+                          disabled={!isValidServiceDay}
                           className={`
                             p-2 text-sm rounded-md relative
                             ${!isCurrentMonth && 'text-muted-foreground/50'}
                             ${isSameDay && 'bg-primary text-primary-foreground'}
-                            ${isSaturday && !isSameDay && 'hover:bg-muted cursor-pointer'}
-                            ${!isSaturday && 'cursor-not-allowed opacity-50'}
+                            ${isValidServiceDay && !isSameDay && 'hover:bg-muted cursor-pointer'}
+                            ${!isValidServiceDay && 'cursor-not-allowed opacity-50'}
                           `}
                         >
                           {date.getDate()}

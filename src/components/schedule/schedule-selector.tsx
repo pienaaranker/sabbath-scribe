@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { PlusCircle, Settings, Link as LinkIcon } from "lucide-react";
 import { useFirestore } from '@/context/firestore-context';
 import { useAuth } from '@/context/auth-context';
-import { Schedule } from '@/types';
+import { Schedule, ServiceDayConfig } from '@/types';
 import {
   Dialog,
   DialogContent,
@@ -30,6 +30,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import ServiceDayConfigComponent from '@/components/admin/schedules/service-day-config';
 
 export default function ScheduleSelector() {
   const { 
@@ -43,6 +44,11 @@ export default function ScheduleSelector() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newScheduleName, setNewScheduleName] = useState('');
   const [newScheduleDescription, setNewScheduleDescription] = useState('');
+  const [serviceDayConfig, setServiceDayConfig] = useState<ServiceDayConfig>({
+    primaryDay: 6, // Default to Saturday
+    additionalDays: [],
+    allowCustomDates: false
+  });
   const [isCreating, setIsCreating] = useState(false);
 
   if (!user) {
@@ -72,6 +78,7 @@ export default function ScheduleSelector() {
       await addSchedule({
         name: newScheduleName.trim(),
         description: newScheduleDescription.trim() || undefined,
+        serviceDayConfig,
         adminUserIds: [],
       });
       
@@ -82,6 +89,11 @@ export default function ScheduleSelector() {
       
       setNewScheduleName('');
       setNewScheduleDescription('');
+      setServiceDayConfig({
+        primaryDay: 6,
+        additionalDays: [],
+        allowCustomDates: false
+      });
       setIsCreateDialogOpen(false);
     } catch (error) {
       console.error('Error creating schedule:', error);
@@ -120,14 +132,14 @@ export default function ScheduleSelector() {
             <PlusCircle className="h-4 w-4" />
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Create New Schedule</DialogTitle>
             <DialogDescription>
               Create a new schedule to manage assignments and people.
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 py-4">
+          <div className="space-y-6 py-4">
             <div className="space-y-2">
               <Label htmlFor="schedule-name">Schedule Name</Label>
               <Input
@@ -141,11 +153,17 @@ export default function ScheduleSelector() {
               <Label htmlFor="schedule-description">Description (Optional)</Label>
               <Textarea
                 id="schedule-description"
-                placeholder="Schedule for our weekly Sabbath services"
+                placeholder="Schedule for our weekly services"
                 value={newScheduleDescription}
                 onChange={(e) => setNewScheduleDescription(e.target.value)}
               />
             </div>
+
+            {/* Service Day Configuration */}
+            <ServiceDayConfigComponent
+              config={serviceDayConfig}
+              onChange={setServiceDayConfig}
+            />
             <div className="flex justify-end">
               <Button 
                 onClick={handleCreateSchedule} 

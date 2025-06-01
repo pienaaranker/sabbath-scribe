@@ -5,17 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useFirestore } from '@/context/firestore-context';
 import type { Person, RoleId, Assignment, SabbathAssignment } from '@/types';
-import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb } from '@/lib/date-utils';
+import { getNearestSaturday, getNextSabbath, getPreviousSabbath, formatDateForDb, formatDateForDisplay, parseDateFromDb, getNearestServiceDay, getNextServiceDay, getPreviousServiceDay, getServiceDayName } from '@/lib/date-utils';
 import { ChevronLeft, ChevronRight, CalendarIcon, Users } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
+import { ServiceCalendar } from "@/components/ui/service-calendar";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from '@/hooks/use-toast';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 export default function AssignmentManagementClient() {
-  const { people, getAssignmentsForDate, getPersonById, addAssignment, updateAssignment, deleteAssignment, loading, error, roles } = useFirestore();
-  const [selectedDate, setSelectedDate] = useState<Date>(() => getNearestSaturday(new Date()));
+  const { people, getAssignmentsForDate, getPersonById, addAssignment, updateAssignment, deleteAssignment, loading, error, roles, currentSchedule } = useFirestore();
+
+  // Use service day configuration from current schedule, fallback to Saturday
+  const serviceDayConfig = currentSchedule?.serviceDayConfig || { primaryDay: 6, additionalDays: [], allowCustomDates: false };
+  const [selectedDate, setSelectedDate] = useState<Date>(() =>
+    getNearestServiceDay(new Date(), serviceDayConfig.primaryDay)
+  );
   const { toast } = useToast();
 
   const formattedDate = useMemo(() => formatDateForDb(selectedDate), [selectedDate]);
@@ -33,7 +38,12 @@ export default function AssignmentManagementClient() {
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      setSelectedDate(getNearestSaturday(date));
+      // If custom dates are allowed, use the date as-is, otherwise snap to nearest service day
+      if (serviceDayConfig.allowCustomDates) {
+        setSelectedDate(date);
+      } else {
+        setSelectedDate(getNearestServiceDay(date, serviceDayConfig.primaryDay));
+      }
     }
   };
 
@@ -222,14 +232,16 @@ export default function AssignmentManagementClient() {
       {/* Right: Calendar */}
       <div className="w-full lg:w-80 flex-shrink-0">
         <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6 lg:sticky lg:top-8">
-          <h2 className="text-lg sm:text-xl font-bold mb-4 text-center lg:text-left">Select Sabbath</h2>
+          <h2 className="text-lg sm:text-xl font-bold mb-4 text-center lg:text-left">
+            Select {getServiceDayName(serviceDayConfig.primaryDay)}
+          </h2>
           <div className="flex justify-center">
-            <Calendar
+            <ServiceCalendar
               mode="single"
               selected={selectedDate}
               onSelect={handleDateChange}
               initialFocus
-              disabled={(date) => date.getDay() !== 6}
+              serviceDayConfig={serviceDayConfig}
               className="rounded-md border"
             />
           </div>
