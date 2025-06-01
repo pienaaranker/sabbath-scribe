@@ -144,14 +144,14 @@ export default function AssignmentManagementClient() {
                   </span>
                 </div>
                 <Select
-                  value={assignedPerson?.id || ''}
-                  onValueChange={(value) => handleAssignmentChange(role.id as RoleId, value || null)}
+                  value={assignedPerson?.id || 'unassigned'}
+                  onValueChange={(value) => handleAssignmentChange(role.id as RoleId, value === 'unassigned' ? null : value)}
                 >
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select person..." />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Unassigned</SelectItem>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
                     {assignablePeople.map((person) => (
                       <SelectItem key={person.id} value={person.id}>
                         {person.name}
@@ -187,7 +187,7 @@ export default function AssignmentManagementClient() {
                   <TableCell className="font-medium">{role.name}</TableCell>
                   <TableCell>
                     <Select
-                      value={assignedPerson?.id || ""}
+                      value={assignedPerson?.id || "unassign"}
                       onValueChange={(value) => handleAssignmentChange(role.id as RoleId, value === "unassign" ? null : value)}
                     >
                       <SelectTrigger className="w-[200px]">
