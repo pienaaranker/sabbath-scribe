@@ -245,7 +245,7 @@ export default function ScheduleSelector() {
               </div>
               <div className="mt-3 pt-3 border-t border-border">
                 <Button variant="ghost" size="sm" className="w-full justify-start text-sm" asChild>
-                  <a href={`/admin/schedules`}>Manage Schedule</a>
+                  <a href={`/admin/schedules`}>Manage Schedules</a>
                 </Button>
               </div>
             </div>

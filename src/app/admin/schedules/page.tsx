@@ -239,9 +239,8 @@ export default function SchedulesManagementPage() {
               <CardContent>
                 <div className="flex gap-2">
                   <Button size="sm" variant="secondary" asChild>
-                    <Link href={`/admin/schedules/${schedule.id}`}>View</Link>
+                    <Link href={`/admin/schedules/${schedule.id}`}>Manage</Link>
                   </Button>
-                  <Button size="sm" variant="outline" onClick={() => openEditDialog(schedule)}><Pencil className="mr-1 h-4 w-4" />Edit</Button>
                   <Button size="sm" variant="destructive" onClick={() => handleDeleteSchedule(schedule.id)}><Trash2 className="mr-1 h-4 w-4" />Delete</Button>
                 </div>
               </CardContent>
