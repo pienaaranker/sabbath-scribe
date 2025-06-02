@@ -28,6 +28,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { ServiceDayConfig } from '@/types';
+import ServiceDayConfigComponent from '@/components/admin/schedules/service-day-config';
+import ChurchTypeSelector from '@/components/admin/schedules/church-type-selector';
 
 export default function AdminDashboardPage() {
   const { schedules, currentSchedule, addSchedule } = useFirestore();
@@ -35,6 +38,12 @@ export default function AdminDashboardPage() {
   const { toast } = useToast();
   const [newScheduleName, setNewScheduleName] = useState('');
   const [newScheduleDescription, setNewScheduleDescription] = useState('');
+  const [serviceDayConfig, setServiceDayConfig] = useState<ServiceDayConfig>({
+    primaryDay: 6, // Default to Saturday
+    additionalDays: [],
+    allowCustomDates: false
+  });
+  const [currentStep, setCurrentStep] = useState<'church-type' | 'details' | 'service-config'>('church-type');
   const [isCreating, setIsCreating] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
@@ -54,6 +63,7 @@ export default function AdminDashboardPage() {
       await addSchedule({
         name: newScheduleName.trim(),
         description: newScheduleDescription.trim() || undefined,
+        serviceDayConfig,
         adminUserIds: [],
       });
 
@@ -64,6 +74,12 @@ export default function AdminDashboardPage() {
 
       setNewScheduleName('');
       setNewScheduleDescription('');
+      setServiceDayConfig({
+        primaryDay: 6,
+        additionalDays: [],
+        allowCustomDates: false
+      });
+      setCurrentStep('church-type');
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Error creating schedule:', error);
@@ -103,44 +119,97 @@ export default function AdminDashboardPage() {
                   Create Your First Schedule
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+              <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="font-serif text-secondary">Create New Schedule</DialogTitle>
+                  <DialogTitle className="font-serif text-secondary">
+                    Create Your First Schedule
+                    <span className="text-sm font-normal text-muted-foreground ml-2">
+                      Step {currentStep === 'church-type' ? '1' : currentStep === 'details' ? '2' : '3'} of 3
+                    </span>
+                  </DialogTitle>
                   <DialogDescription className="text-muted-foreground">
-                    Create a new schedule to manage assignments and people.
+                    {currentStep === 'church-type' && "Choose your church type to get started with the right service day configuration."}
+                    {currentStep === 'details' && "Enter your schedule details."}
+                    {currentStep === 'service-config' && "Review and customize your service day configuration."}
                   </DialogDescription>
                 </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="new-schedule-name" className="text-secondary font-medium">Schedule Name</Label>
-                    <Input
-                      id="new-schedule-name"
-                      placeholder="Weekly Service Schedule"
-                      value={newScheduleName}
-                      onChange={(e) => setNewScheduleName(e.target.value)}
-                      className="border-border focus:ring-primary focus:border-primary"
+
+                <div className="py-4">
+                  {currentStep === 'church-type' && (
+                    <ChurchTypeSelector
+                      onSelect={(config) => {
+                        setServiceDayConfig(config);
+                        setCurrentStep('details');
+                      }}
+                      selectedConfig={serviceDayConfig}
                     />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="new-schedule-description" className="text-secondary font-medium">Description (Optional)</Label>
-                    <Textarea
-                      id="new-schedule-description"
-                      placeholder="Schedule for our weekly services"
-                      value={newScheduleDescription}
-                      onChange={(e) => setNewScheduleDescription(e.target.value)}
-                      className="border-border focus:ring-primary focus:border-primary"
-                    />
-                  </div>
+                  )}
+
+                  {currentStep === 'details' && (
+                    <div className="space-y-6">
+                      <div className="space-y-2">
+                        <Label htmlFor="new-schedule-name" className="text-secondary font-medium">Schedule Name</Label>
+                        <Input
+                          id="new-schedule-name"
+                          placeholder="Weekly Service Schedule"
+                          value={newScheduleName}
+                          onChange={(e) => setNewScheduleName(e.target.value)}
+                          className="border-border focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="new-schedule-description" className="text-secondary font-medium">Description (Optional)</Label>
+                        <Textarea
+                          id="new-schedule-description"
+                          placeholder="Schedule for our weekly services"
+                          value={newScheduleDescription}
+                          onChange={(e) => setNewScheduleDescription(e.target.value)}
+                          className="border-border focus:ring-primary focus:border-primary"
+                        />
+                      </div>
+
+                      <div className="flex justify-between">
+                        <Button
+                          variant="outline"
+                          onClick={() => setCurrentStep('church-type')}
+                        >
+                          Back
+                        </Button>
+                        <Button
+                          onClick={() => setCurrentStep('service-config')}
+                          disabled={!newScheduleName.trim()}
+                        >
+                          Next
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+
+                  {currentStep === 'service-config' && (
+                    <div className="space-y-6">
+                      <ServiceDayConfigComponent
+                        config={serviceDayConfig}
+                        onChange={setServiceDayConfig}
+                      />
+
+                      <div className="flex justify-between">
+                        <Button
+                          variant="outline"
+                          onClick={() => setCurrentStep('details')}
+                        >
+                          Back
+                        </Button>
+                        <Button
+                          onClick={handleCreateSchedule}
+                          disabled={!newScheduleName.trim() || isCreating}
+                          className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+                        >
+                          {isCreating ? 'Creating...' : 'Create Schedule'}
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-                <DialogFooter>
-                  <Button
-                    onClick={handleCreateSchedule}
-                    disabled={!newScheduleName.trim() || isCreating}
-                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
-                  >
-                    {isCreating ? 'Creating...' : 'Create Schedule'}
-                  </Button>
-                </DialogFooter>
               </DialogContent>
             </Dialog>
           </CardContent>
