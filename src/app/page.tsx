@@ -8,19 +8,24 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="hero">
         <div className="container">
-          <div className="hero-badge">Church Management Solution</div>
+          <div className="flex justify-center mb-6">
+            <Image
+              src="/logo.png"
+              alt="InService Logo"
+              width={160}
+              height={160}
+              className="h-32 w-32 sm:h-40 sm:w-40 object-contain"
+            />
+          </div>
           <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
             InService
           </h1>
           <p className="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-8 opacity-95">
             Effortlessly manage your church's service schedules, assignments, and roles. Empower your team, reduce confusion, and keep everyone in sync—online and on time.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12 w-full max-w-md sm:max-w-none mx-auto">
-            <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium py-3 px-8 rounded-lg transition-all w-full sm:w-auto">
-              <Link href="/auth">Get Started</Link>
-            </Button>
-            <Button asChild size="lg" variant="outline" className="bg-white border-2 border-white text-primary hover:bg-primary hover:text-white font-medium py-3 px-8 rounded-lg transition-all w-full sm:w-auto">
-              <Link href="/schedule">View Demo Schedule</Link>
+          <div className="flex justify-center mb-12">
+            <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium py-3 px-8 rounded-lg transition-all">
+              <Link href="/auth">Log In to Get Started</Link>
             </Button>
           </div>
         </div>

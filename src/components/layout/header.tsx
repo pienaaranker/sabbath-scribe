@@ -25,12 +25,6 @@ export default function Header() {
           <span className="xs:hidden sm:hidden">IS</span>
         </Link>
         <nav className="flex items-center gap-1 sm:gap-2 md:gap-4">
-          <Button variant="ghost" asChild className="text-xs sm:text-sm md:text-base hover:bg-white/10 text-primary-foreground px-2 sm:px-3 md:px-4">
-            <Link href="/">
-              <span className="hidden sm:inline">Schedule</span>
-              <span className="sm:hidden">Sched</span>
-            </Link>
-          </Button>
           {user ? (
             <Button asChild className="text-xs sm:text-sm md:text-base bg-accent hover:bg-accent/90 text-accent-foreground font-medium px-2 sm:px-3 md:px-4 rounded-lg transition-all">
               <Link href="/admin">
