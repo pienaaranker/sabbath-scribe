@@ -93,7 +93,7 @@ export default function ServiceDayConfigComponent({ config, onChange }: ServiceD
                   checked={config.additionalDays?.includes(day) || false}
                   onCheckedChange={(checked) => handleAdditionalDayToggle(day, checked as boolean)}
                 />
-                <Label htmlFor={`additional-${day}`} className="text-sm">
+                <Label htmlFor={`additional-${day}`} className="text-sm cursor-pointer">
                   {getServiceDayName(day)}
                 </Label>
               </div>
@@ -111,7 +111,7 @@ export default function ServiceDayConfigComponent({ config, onChange }: ServiceD
             checked={config.allowCustomDates || false}
             onCheckedChange={handleCustomDatesToggle}
           />
-          <Label htmlFor="allow-custom" className="text-sm">
+          <Label htmlFor="allow-custom" className="text-sm cursor-pointer">
             Allow scheduling on any date
           </Label>
         </div>
