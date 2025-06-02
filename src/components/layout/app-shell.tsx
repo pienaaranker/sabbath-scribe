@@ -12,6 +12,7 @@ export default function AppShell({ children }: AppShellProps) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith('/admin');
   const isHomepage = pathname === '/';
+  const isAuthPage = pathname === '/auth';
 
   useEffect(() => {
     if (isHomepage) {
@@ -62,32 +63,17 @@ export default function AppShell({ children }: AppShellProps) {
 
   return (
     <div className="min-h-screen flex flex-col">
-      {isAdminRoute ? <AdminHeader /> : <Header />}
+      {!isAuthPage && (isAdminRoute ? <AdminHeader /> : <Header />)}
 
-      {isHomepage && (
-        <div className="hero gradient-bg">
-          <div className="floating-elements">
-            <div className="floating-element" style={{top: '20%', left: '20%'}}></div>
-            <div className="floating-element" style={{top: '60%', left: '80%', animationDelay: '2s'}}></div>
-            <div className="floating-element" style={{top: '40%', left: '60%', animationDelay: '4s'}}></div>
-          </div>
-          <div className="container">
-            <div className="hero-badge">Church Management Solution</div>
-            <h1>SabbathScribe</h1>
-            <p>Effortless Church Roster Management for Your Team</p>
-          </div>
-        </div>
-      )}
-
-      <main className={isHomepage ? 'main-content' : 'flex-grow bg-white'}>
-        <div className={isHomepage ? '' : 'container mx-auto px-4 py-6 sm:py-8'}>
+      <main className={isHomepage || isAuthPage ? '' : 'flex-grow bg-background'}>
+        <div className={isHomepage || isAuthPage ? '' : 'container mx-auto px-4 py-6 sm:py-8'}>
           {children}
         </div>
       </main>
 
-      {!isHomepage && (
-        <footer className="py-4 sm:py-6 text-center text-xs sm:text-sm text-muted-foreground bg-white">
-          © {new Date().getFullYear()} SabbathScribe. All rights reserved.
+      {!isHomepage && !isAuthPage && (
+        <footer className="py-4 sm:py-6 text-center text-xs sm:text-sm text-muted-foreground bg-background border-t border-border">
+          © {new Date().getFullYear()} InService. All rights reserved.
         </footer>
       )}
     </div>

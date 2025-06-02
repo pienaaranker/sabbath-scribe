@@ -126,7 +126,7 @@ export default function AuthForm() {
     <div className="auth-form-container">
       <div className="auth-form-inner">
         <div className="auth-form-header">
-          <h1 className="auth-title">SabbathScribe</h1>
+          <h1 className="auth-title">InService</h1>
           <p className="auth-subtitle">Manage your church's weekly assignments</p>
         </div>
 

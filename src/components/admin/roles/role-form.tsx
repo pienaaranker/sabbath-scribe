@@ -119,23 +119,25 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="name">Role Name</Label>
-        <Input 
-          id="name" 
-          {...register('name')} 
+        <Label htmlFor="name" className="text-secondary font-medium">Role Name</Label>
+        <Input
+          id="name"
+          {...register('name')}
           placeholder="Preacher"
+          className="border-light focus:ring-primary focus:border-primary"
         />
         {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
       </div>
-      
+
       <div className="space-y-2">
-        <Label htmlFor="id">Role ID</Label>
-        <Input 
-          id="id" 
-          {...register('id')} 
+        <Label htmlFor="id" className="text-secondary font-medium">Role ID</Label>
+        <Input
+          id="id"
+          {...register('id')}
           disabled={!!role} // Disable editing ID for existing roles
           placeholder="preacher"
           onChange={handleIdChange}
+          className="border-light focus:ring-primary focus:border-primary"
         />
         {errors.id && <p className="text-destructive text-sm">{errors.id.message}</p>}
         {!role && (
@@ -144,19 +146,20 @@ export default function RoleForm({ role, onSuccess }: RoleFormProps) {
           </p>
         )}
       </div>
-      
+
       <div className="space-y-2">
-        <Label htmlFor="description">Description (Optional)</Label>
+        <Label htmlFor="description" className="text-secondary font-medium">Description (Optional)</Label>
         <Textarea
           id="description"
           {...register('description')}
           placeholder="Delivers the main sermon"
           rows={3}
+          className="border-light focus:ring-primary focus:border-primary"
         />
       </div>
-      
+
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting} className="gradient-bg text-white border-0 hover:opacity-90">
+        <Button type="submit" disabled={isSubmitting} className="bg-secondary hover:bg-secondary/90 text-white border-0">
           {isSubmitting ? 'Saving...' : role ? 'Update Role' : 'Add Role'}
         </Button>
       </div>

@@ -77,18 +77,18 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
       <div className="space-y-2">
-        <Label htmlFor="name">Name</Label>
-        <Input id="name" {...register('name')} />
+        <Label htmlFor="name" className="text-secondary font-medium">Name</Label>
+        <Input id="name" {...register('name')} className="border-light focus:ring-primary focus:border-primary" />
         {errors.name && <p className="text-destructive text-sm">{errors.name.message}</p>}
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="contactInfo">Contact Info (optional)</Label>
-        <Input id="contactInfo" {...register('contactInfo')} placeholder="Email or phone number" />
+        <Label htmlFor="contactInfo" className="text-secondary font-medium">Contact Info (optional)</Label>
+        <Input id="contactInfo" {...register('contactInfo')} placeholder="Email or phone number" className="border-light focus:ring-primary focus:border-primary" />
       </div>
 
       <div className="space-y-3">
-        <Label>Roles this person can fill (optional)</Label>
+        <Label className="text-secondary font-medium">Roles this person can fill (optional)</Label>
         <p className="text-sm text-muted-foreground mb-2">
           Leave all unchecked if this person can fill any role.
         </p>
@@ -131,7 +131,7 @@ export default function PersonForm({ person, onSuccess }: PersonFormProps) {
       </div>
 
       <div className="flex justify-end">
-        <Button type="submit" disabled={isSubmitting} className="gradient-bg text-white border-0 hover:opacity-90">
+        <Button type="submit" disabled={isSubmitting} className="bg-secondary hover:bg-secondary/90 text-white border-0">
           {isSubmitting ? 'Saving...' : person ? 'Update Person' : 'Add Person'}
         </Button>
       </div>

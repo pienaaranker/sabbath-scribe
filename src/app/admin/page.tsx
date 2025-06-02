@@ -81,52 +81,54 @@ export default function AdminDashboardPage() {
   if (schedules.length === 0) {
     return (
       <div className="container max-w-4xl py-8 sm:py-12 px-4">
-        <Card className="border-2 border-dashed">
+        <Card className="border-2 border-dashed border-border bg-card">
           <CardHeader className="text-center px-4 sm:px-6">
-            <CardTitle className="text-xl sm:text-2xl">Welcome to SabbathScribe</CardTitle>
-            <CardDescription className="text-sm sm:text-base">
+            <CardTitle className="font-serif text-xl sm:text-2xl text-secondary">Welcome to InService</CardTitle>
+            <CardDescription className="text-sm sm:text-base text-muted-foreground">
               Get started by creating your first schedule
             </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center pb-6 px-4 sm:px-6">
-            <div className="rounded-full bg-primary/10 p-4 sm:p-6 mb-4 sm:mb-6">
+            <div className="rounded-full bg-light p-4 sm:p-6 mb-4 sm:mb-6 border border-border">
               <Calendar className="h-8 w-8 sm:h-12 sm:w-12 text-primary" />
             </div>
             <p className="text-center text-muted-foreground mb-4 sm:mb-6 max-w-md text-sm sm:text-base">
-              A schedule is where you'll manage your church's Sabbath assignments.
+              A schedule is where you'll manage your church's service assignments.
               You can create multiple schedules for different purposes or congregations.
             </p>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="gradient-bg text-white border-0 hover:opacity-90">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium">
                   <PlusCircle className="mr-2 h-4 w-4" />
                   Create Your First Schedule
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Create New Schedule</DialogTitle>
-                  <DialogDescription>
+                  <DialogTitle className="font-serif text-secondary">Create New Schedule</DialogTitle>
+                  <DialogDescription className="text-muted-foreground">
                     Create a new schedule to manage assignments and people.
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="space-y-2">
-                    <Label htmlFor="new-schedule-name">Schedule Name</Label>
+                    <Label htmlFor="new-schedule-name" className="text-secondary font-medium">Schedule Name</Label>
                     <Input
                       id="new-schedule-name"
                       placeholder="Weekly Service Schedule"
                       value={newScheduleName}
                       onChange={(e) => setNewScheduleName(e.target.value)}
+                      className="border-border focus:ring-primary focus:border-primary"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="new-schedule-description">Description (Optional)</Label>
+                    <Label htmlFor="new-schedule-description" className="text-secondary font-medium">Description (Optional)</Label>
                     <Textarea
                       id="new-schedule-description"
-                      placeholder="Schedule for our weekly Sabbath services"
+                      placeholder="Schedule for our weekly services"
                       value={newScheduleDescription}
                       onChange={(e) => setNewScheduleDescription(e.target.value)}
+                      className="border-border focus:ring-primary focus:border-primary"
                     />
                   </div>
                 </div>
@@ -134,7 +136,7 @@ export default function AdminDashboardPage() {
                   <Button
                     onClick={handleCreateSchedule}
                     disabled={!newScheduleName.trim() || isCreating}
-                    className="gradient-bg text-white border-0 hover:opacity-90"
+                    className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
                   >
                     {isCreating ? 'Creating...' : 'Create Schedule'}
                   </Button>
@@ -178,7 +180,7 @@ export default function AdminDashboardPage() {
             />
             <DashboardActionCard
               title="Manage Assignments"
-              description="Assign roles for specific Sabbaths and view upcoming schedules."
+              description="Assign roles for specific services and view upcoming schedules."
               link="/admin/assignments"
               actionText="Go to Assignments"
               imageSrc="/clipboard.jpeg"
@@ -208,16 +210,16 @@ interface DashboardActionCardProps {
 
 function DashboardActionCard({ title, description, link, actionText, imageSrc, imageAlt, dataAiHint }: DashboardActionCardProps) {
   return (
-    <div className="feature-card overflow-hidden flex flex-col h-full">
+    <div className="feature-card overflow-hidden flex flex-col h-full bg-card border border-border">
       <div className="relative w-full h-32 sm:h-40">
         <Image src={imageSrc} alt={imageAlt} fill style={{ objectFit: 'cover' }} data-ai-hint={dataAiHint} />
       </div>
       <div className="p-4 sm:p-6 flex-grow">
-        <h3 className="text-lg sm:text-xl font-semibold mb-2">{title}</h3>
+        <h3 className="font-serif text-lg sm:text-xl font-semibold mb-2 text-secondary">{title}</h3>
         <p className="text-muted-foreground mb-4 sm:mb-6 text-sm sm:text-base">{description}</p>
       </div>
       <div className="px-4 sm:px-6 pb-4 sm:pb-6">
-        <Button asChild className="w-full gradient-bg text-white border-0 hover:opacity-90 h-10 sm:h-11">
+        <Button asChild className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium h-10 sm:h-11">
           <Link href={link}>{actionText}</Link>
         </Button>
       </div>

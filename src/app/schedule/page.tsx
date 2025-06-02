@@ -22,7 +22,7 @@ export default function PublicSchedulePage() {
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mb-4" />
         <p className="text-muted-foreground">Loading schedule...</p>
         {loading && (
-          <Button onClick={() => window.location.reload()} className="mt-4">Try Again</Button>
+          <Button onClick={() => window.location.reload()} className="mt-4 bg-secondary hover:bg-secondary/90 text-white">Try Again</Button>
         )}
       </div>
     </div>

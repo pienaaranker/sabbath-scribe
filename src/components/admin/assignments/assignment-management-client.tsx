@@ -113,13 +113,13 @@ export default function AssignmentManagementClient() {
   if (people.length === 0 || roles.length === 0) {
     return (
       <div className="text-center py-20">
-        <h2 className="text-2xl font-bold mb-4">Cannot Assign Staff</h2>
+        <h2 className="text-2xl font-serif font-bold text-secondary mb-4">Cannot Assign Staff</h2>
         <p className="text-muted-foreground mb-6">
           You need to add both <span className="font-semibold">people</span> and <span className="font-semibold">roles</span> before you can assign staff to roles.
         </p>
         <div className="flex justify-center gap-4">
-          <Button onClick={() => window.location.href = '/admin/people'} variant="outline">Add People</Button>
-          <Button onClick={() => window.location.href = '/admin/roles'} variant="outline">Add Roles</Button>
+          <Button onClick={() => window.location.href = '/admin/people'} variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-white">Add People</Button>
+          <Button onClick={() => window.location.href = '/admin/roles'} variant="outline" className="border-secondary text-secondary hover:bg-secondary hover:text-white">Add Roles</Button>
         </div>
       </div>
     );
@@ -128,8 +128,8 @@ export default function AssignmentManagementClient() {
   return (
     <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 px-4">
       {/* Left: Assignments Table */}
-      <div className="flex-1 bg-white rounded-xl shadow-lg p-4 sm:p-6">
-        <h2 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center lg:text-left">
+      <div className="flex-1 bg-white rounded-xl shadow-md border border-light p-4 sm:p-6">
+        <h2 className="text-xl sm:text-2xl font-serif font-bold text-secondary mb-4 sm:mb-6 text-center lg:text-left">
           Assignments for {formatDateForDisplay(selectedDate)}
         </h2>
 
@@ -143,12 +143,12 @@ export default function AssignmentManagementClient() {
             );
 
             return (
-              <div key={role.id} className="border rounded-lg p-4 space-y-3">
+              <div key={role.id} className="border border-light rounded-lg p-4 space-y-3">
                 <div className="flex justify-between items-start">
-                  <h3 className="font-semibold text-lg">{role.name}</h3>
+                  <h3 className="font-serif font-semibold text-lg text-secondary">{role.name}</h3>
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                     isUnassigned
-                      ? 'bg-red-100 text-red-800'
+                      ? 'bg-destructive/10 text-destructive'
                       : 'bg-green-100 text-green-800'
                   }`}>
                     {isUnassigned ? 'Unassigned' : 'Assigned'}
@@ -158,7 +158,7 @@ export default function AssignmentManagementClient() {
                   value={assignedPerson?.id || 'unassigned'}
                   onValueChange={(value) => handleAssignmentChange(role.id as RoleId, value === 'unassigned' ? null : value)}
                 >
-                  <SelectTrigger className="w-full">
+                  <SelectTrigger className="w-full border-light focus:ring-primary focus:border-primary">
                     <SelectValue placeholder="Select person..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -179,10 +179,10 @@ export default function AssignmentManagementClient() {
         <div className="hidden sm:block">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Role</TableHead>
-                <TableHead>Assignee</TableHead>
-                <TableHead className="w-[100px]">Status</TableHead>
+              <TableRow className="border-b border-light">
+                <TableHead className="font-serif text-secondary">Role</TableHead>
+                <TableHead className="font-serif text-secondary">Assignee</TableHead>
+                <TableHead className="w-[100px] font-serif text-secondary">Status</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -194,14 +194,14 @@ export default function AssignmentManagementClient() {
                 !p.fillableRoleIds || p.fillableRoleIds.length === 0 || p.fillableRoleIds.includes(role.id)
               );
               return (
-                <TableRow key={role.id}>
-                  <TableCell className="font-medium">{role.name}</TableCell>
+                <TableRow key={role.id} className="hover:bg-light/50 border-b border-light/50">
+                  <TableCell className="font-medium text-secondary">{role.name}</TableCell>
                   <TableCell>
                     <Select
                       value={assignedPerson?.id || "unassign"}
                       onValueChange={(value) => handleAssignmentChange(role.id as RoleId, value === "unassign" ? null : value)}
                     >
-                      <SelectTrigger className="w-[200px]">
+                      <SelectTrigger className="w-[200px] border-light focus:ring-primary focus:border-primary">
                         <SelectValue placeholder="Select a person" />
                       </SelectTrigger>
                       <SelectContent>
@@ -232,9 +232,9 @@ export default function AssignmentManagementClient() {
 
       {/* Right: Calendar */}
       <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
-        <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-          <h2 className="text-lg sm:text-xl font-bold mb-4 text-center lg:text-left">
-            Select {getServiceDayName(serviceDayConfig.primaryDay)}
+        <div className="bg-white rounded-xl shadow-md border border-light p-4 sm:p-6">
+          <h2 className="text-lg sm:text-xl font-serif font-bold text-secondary mb-4 text-center lg:text-left">
+            Select Service Day
           </h2>
           <div className="flex justify-center">
             <ServiceCalendar
@@ -243,16 +243,16 @@ export default function AssignmentManagementClient() {
               onSelect={handleDateChange}
               initialFocus
               serviceDayConfig={serviceDayConfig}
-              className="rounded-md border"
+              className="rounded-md border border-light"
             />
           </div>
         </div>
 
         {/* Holiday Selector - Only show if custom dates are allowed */}
         {serviceDayConfig.allowCustomDates && (
-          <div className="bg-white rounded-xl shadow-lg p-4 sm:p-6">
-            <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-              <Star className="h-5 w-5 text-amber-500" />
+          <div className="bg-white rounded-xl shadow-md border border-light p-4 sm:p-6">
+            <h3 className="text-lg font-serif font-bold text-secondary mb-4 flex items-center gap-2">
+              <Star className="h-5 w-5 text-accent" />
               Holiday Services
             </h3>
             <HolidaySelector

@@ -4,57 +4,89 @@ import { Button } from '@/components/ui/button';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-gradient-to-b from-primary/5 to-white">
+    <main className="min-h-screen bg-background">
       {/* Hero Section */}
-      <section className="container py-12 sm:py-16 md:py-20 flex flex-col items-center text-center">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-extrabold mb-4 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent px-4">
-          Sabbath Scribe
-        </h1>
-        <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground max-w-2xl mb-6 sm:mb-8 px-4">
-          Effortlessly manage your church's Sabbath schedules, assignments, and roles. Empower your team, reduce confusion, and keep everyone in sync—online and on time.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-10 w-full max-w-md sm:max-w-none px-4">
-          <Button asChild size="lg" className="gradient-bg text-white border-0 hover:opacity-90 w-full sm:w-auto">
-            <Link href="/auth">Get Started</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-            <Link href="/schedule">View Demo Schedule</Link>
-          </Button>
-        </div>
-        {/* Hero Image - Responsive */}
-        <div className="w-full max-w-4xl mx-auto px-4">
-          <div className="relative w-full aspect-video sm:aspect-[16/10] md:aspect-[16/9] overflow-hidden rounded-lg sm:rounded-xl shadow-xl border">
+      <section className="hero">
+        <div className="container">
+          <div className="flex justify-center mb-6">
             <Image
-              src="/sabbath-hero.jpeg"
-              alt="Sabbath Scribe screenshot"
-              fill
-              style={{ objectFit: 'cover', objectPosition: 'center 55%' }}
-              className="w-full h-full"
-              priority
-              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
+              src="/logo.png"
+              alt="InService Logo"
+              width={160}
+              height={160}
+              className="h-32 w-32 sm:h-40 sm:w-40 object-contain"
             />
+          </div>
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl font-bold mb-6">
+            InService
+          </h1>
+          <p className="text-lg sm:text-xl md:text-2xl max-w-3xl mx-auto mb-8 opacity-95">
+            Effortlessly manage your church's service schedules, assignments, and roles. Empower your team, reduce confusion, and keep everyone in sync—online and on time.
+          </p>
+          <div className="flex justify-center mb-12">
+            <Button asChild size="lg" className="bg-secondary hover:bg-secondary/90 text-secondary-foreground font-medium py-3 px-8 rounded-lg transition-all">
+              <Link href="/auth">Log In to Get Started</Link>
+            </Button>
           </div>
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="container py-12 sm:py-16">
-        <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-center mb-8 sm:mb-10 px-4">Why Sabbath Scribe?</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 px-4">
-          <div className="feature-card p-4 sm:p-6 rounded-xl shadow text-center">
-            <h3 className="text-lg sm:text-xl font-semibold mb-3">Easy Assignment Management</h3>
-            <p className="text-sm sm:text-base text-muted-foreground">Assign roles and responsibilities for each Sabbath with just a few clicks. No more spreadsheets or last-minute confusion.</p>
+      {/* Main Content */}
+      <div className="main-content">
+        {/* Hero Image Section */}
+        <section className="container py-12 sm:py-16">
+          <div className="w-full max-w-5xl mx-auto">
+            <div className="relative w-full aspect-video overflow-hidden rounded-xl shadow-lg border border-border">
+              <Image
+                src="/sabbath-hero.jpeg"
+                alt="InService church management interface"
+                fill
+                style={{ objectFit: 'cover', objectPosition: 'center 55%' }}
+                className="w-full h-full"
+                priority
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
+              />
+            </div>
           </div>
-          <div className="feature-card p-4 sm:p-6 rounded-xl shadow text-center">
-            <h3 className="text-lg sm:text-xl font-semibold mb-3">Collaborative & Accessible</h3>
-            <p className="text-sm sm:text-base text-muted-foreground">Leaders and staff can view, update, and access schedules from anywhere, on any device.</p>
+        </section>
+
+        {/* Features Section */}
+        <section className="section">
+          <div className="container">
+            <h2 className="section-title">Why Choose InService?</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="feature-card text-center">
+                <div className="feature-icon mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  </svg>
+                </div>
+                <h3>Easy Assignment Management</h3>
+                <p>Assign roles and responsibilities for each service with just a few clicks. No more spreadsheets or last-minute confusion.</p>
+              </div>
+              <div className="feature-card text-center">
+                <div className="feature-icon mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                </div>
+                <h3>Collaborative & Accessible</h3>
+                <p>Leaders and staff can view, update, and access schedules from anywhere, on any device.</p>
+              </div>
+              <div className="feature-card text-center">
+                <div className="feature-icon mx-auto">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </div>
+                <h3>Public & Private Views</h3>
+                <p>Share a public schedule with your congregation, while keeping admin tools private and secure.</p>
+              </div>
+            </div>
           </div>
-          <div className="feature-card p-4 sm:p-6 rounded-xl shadow text-center sm:col-span-2 lg:col-span-1">
-            <h3 className="text-lg sm:text-xl font-semibold mb-3">Public & Private Views</h3>
-            <p className="text-sm sm:text-base text-muted-foreground">Share a public schedule with your congregation, while keeping admin tools private and secure.</p>
-          </div>
-        </div>
-      </section>
+        </section>
+      </div>
     </main>
   );
 }
