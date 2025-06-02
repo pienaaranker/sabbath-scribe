@@ -234,7 +234,7 @@ export default function AssignmentManagementClient() {
       <div className="w-full lg:w-80 flex-shrink-0 space-y-6">
         <div className="bg-white rounded-xl shadow-md border border-light p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-serif font-bold text-secondary mb-4 text-center lg:text-left">
-            Select {getServiceDayName(serviceDayConfig.primaryDay)}
+            Select Service Day
           </h2>
           <div className="flex justify-center">
             <ServiceCalendar
