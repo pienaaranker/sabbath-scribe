@@ -73,7 +73,20 @@ export default function AppShell({ children }: AppShellProps) {
 
       {!isHomepage && !isAuthPage && (
         <footer className="py-4 sm:py-6 text-center text-xs sm:text-sm text-muted-foreground bg-background border-t border-border">
-          © {new Date().getFullYear()} InService. All rights reserved.
+          <div className="space-y-1">
+            <div>© {new Date().getFullYear()} InService. All rights reserved.</div>
+            <div>
+              Built by{' '}
+              <a
+                href="https://www.ankerstudios.co.za/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-primary hover:text-secondary transition-colors underline"
+              >
+                Anker Studios
+              </a>
+            </div>
+          </div>
         </footer>
       )}
     </div>
