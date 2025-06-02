@@ -33,22 +33,6 @@ export default function HomePage() {
 
       {/* Main Content */}
       <div className="main-content">
-        {/* Hero Image Section */}
-        <section className="container py-12 sm:py-16">
-          <div className="w-full max-w-5xl mx-auto">
-            <div className="relative w-full aspect-video overflow-hidden rounded-xl shadow-lg border border-border">
-              <Image
-                src="/sabbath-hero.jpeg"
-                alt="InService church management interface"
-                fill
-                style={{ objectFit: 'cover', objectPosition: 'center 55%' }}
-                className="w-full h-full"
-                priority
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 80vw"
-              />
-            </div>
-          </div>
-        </section>
 
         {/* Features Section */}
         <section className="section">

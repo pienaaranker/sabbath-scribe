@@ -37,26 +37,6 @@ export default function AppShell({ children }: AppShellProps) {
         observer.observe(card);
       });
 
-      // Add dynamic floating elements
-      const hero = document.querySelector('.hero');
-      if (hero) {
-        const interval = setInterval(() => {
-          const element = document.createElement('div');
-          element.className = 'floating-element';
-          element.style.left = Math.random() * 100 + '%';
-          element.style.top = Math.random() * 100 + '%';
-          element.style.animationDelay = Math.random() * 2 + 's';
-          hero.querySelector('.floating-elements')?.appendChild(element);
-
-          setTimeout(() => element.remove(), 6000);
-        }, 3000);
-
-        return () => {
-          clearInterval(interval);
-          observer.disconnect();
-        };
-      }
-
       return () => observer.disconnect();
     }
   }, [isHomepage]);
